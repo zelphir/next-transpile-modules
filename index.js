@@ -30,6 +30,7 @@ const safePath = (module) => module.split('/').join(PATH_DELIMITER);
  */
 const withTm = (nextConfig = {}) => {
   const { transpileModules = [] } = nextConfig;
+  console.log('test', transpileModules);
   const includes = generateIncludes(transpileModules);
   const excludes = generateExcludes(transpileModules);
 
@@ -45,18 +46,21 @@ const withTm = (nextConfig = {}) => {
       // Avoid Webpack to resolve transpiled modules path to their real path
       config.resolve.symlinks = false;
 
-      config.externals = config.externals.map(external => {
-        if (typeof external !== 'function') return external;
-        return (ctx, req, cb) => {
-          return includes.find(include =>
-            req.startsWith('.')
-              ? include.test(path.resolve(ctx, req))
-              : include.test(req)
-          )
-            ? cb()
-            : external(ctx, req, cb);
-        };
-      });
+      // Since Next.js 8.1.0, config.externals is undefined
+      if (config.externals) {
+        config.externals = config.externals.map(external => {
+          if (typeof external !== 'function') return external;
+          return (ctx, req, cb) => {
+            return includes.find(include =>
+              req.startsWith('.')
+                ? include.test(path.resolve(ctx, req))
+                : include.test(req)
+            )
+              ? cb()
+              : external(ctx, req, cb);
+          };
+        });
+      }
 
       // Add a rule to include and parse all modules
       config.module.rules.push({
