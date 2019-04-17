@@ -30,7 +30,6 @@ const safePath = (module) => module.split('/').join(PATH_DELIMITER);
  */
 const withTm = (nextConfig = {}) => {
   const { transpileModules = [] } = nextConfig;
-  console.log('test', transpileModules);
   const includes = generateIncludes(transpileModules);
   const excludes = generateExcludes(transpileModules);
 
