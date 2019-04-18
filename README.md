@@ -1,6 +1,6 @@
 # Next.js + Transpile `node_modules`
 
-Transpile untranspiled modules from `node_modules`.
+Transpile untranspiled modules from `node_modules` using the Next.js Babel configuration.
 Makes it easy to have local libraries and keep a slick, manageable dev experience.
 
 ## Compatibility table
