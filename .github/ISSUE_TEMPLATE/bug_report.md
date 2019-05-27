@@ -20,9 +20,10 @@ A clear and concise description of what you expected to happen.
 
 **Setup**
 
- - Next.js version:
- - `next-transpile-modules` version:
- - Node.js version:
+- Next.js version:
+- `next-transpile-modules` version:
+- Node.js version:
+- `npm` version:
 - Operating System:
 
 **Additional context**
