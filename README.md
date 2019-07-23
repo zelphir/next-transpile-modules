@@ -7,7 +7,7 @@ Makes it easy to have local libraries and keep a slick, manageable dev experienc
 
 | Next.js version | Plugin version |
 |-----------------|----------------|
-| Next.js 8       | 2.x            |
+| Next.js 8 / 9   | 2.x            |
 | Next.js 6 / 7   | 1.x            |
 
 ## Installation
@@ -83,7 +83,9 @@ If you have a transpilation error when loading a page, check that your `babel.co
 
 ### I have trouble with transpilation and Flow/TypeScript
 
-In your Next.js app, make sure you use a `babel.config.js` and not a `.babelrc` as Babel's configuration file (see explanation below).
+In your Next.js app, make sure you use a `babel.config.js` and not a `.babelrc` as Babel's configuration file (see explanation below). 
+
+**Since Next.js 9, you probably don't need that file anymore**, as TypeScript is supported natively.
 
 ### I have trouble with transpilation and Yarn workspaces
 
