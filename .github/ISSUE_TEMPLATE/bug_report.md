@@ -9,6 +9,9 @@ assignees: ''
 
 - [ ] I HAVE READ [THE FAQ](https://github.com/martpie/next-transpile-modules#faq) AND MY PROBLEM WAS NOT DESCRIBED THERE
 
+**Are you trying to transpile a local package or an npm package?**
+If an npm package, which one?
+
 **Describe the bug**
 A clear and concise description of what the bug is (don't forget the logs if applicable).
 
