@@ -3,6 +3,15 @@
 Transpile untranspiled modules from `node_modules` using the Next.js Babel configuration.
 Makes it easy to have local libraries and keep a slick, manageable dev experience.
 
+What this plugin aims to solve:
+
+- code transpilation from local packages (think: a monorepo with a `styleguide` package)
+- code transpilation from NPM modules using ES6 imports (e.g `lodash-es`)
+
+What this plugin **does not aim** to solve:
+
+- any-package IE11-compatible maker
+
 ## Compatibility table
 
 | Next.js version | Plugin version |
