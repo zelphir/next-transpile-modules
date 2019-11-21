@@ -1,13 +1,24 @@
 # Next.js + Transpile `node_modules`
 
-Transpile untranspiled modules from `node_modules`.
+Transpile untranspiled modules from `node_modules` using the Next.js Babel configuration.
 Makes it easy to have local libraries and keep a slick, manageable dev experience.
+
+## What problem does it solve?
+
+This plugin aims to solve the following challenges:
+
+- code transpilation from local packages (think: a monorepo with a `styleguide` package)
+- code transpilation from NPM modules using ES6 imports (e.g `lodash-es`)
+
+What this plugin **does not aim** to solve:
+
+- any-package IE11-compatible maker
 
 ## Compatibility table
 
 | Next.js version | Plugin version |
 |-----------------|----------------|
-| Next.js 8       | 2.x            |
+| Next.js 8 / 9   | 2.x            |
 | Next.js 6 / 7   | 1.x            |
 
 ## Installation
@@ -83,7 +94,9 @@ If you have a transpilation error when loading a page, check that your `babel.co
 
 ### I have trouble with transpilation and Flow/TypeScript
 
-In your Next.js app, make sure you use a `babel.config.js` and not a `.babelrc` as Babel's configuration file (see explanation below).
+In your Next.js app, make sure you use a `babel.config.js` and not a `.babelrc` as Babel's configuration file (see explanation below). 
+
+**Since Next.js 9, you probably don't need that file anymore**, as TypeScript is supported natively.
 
 ### I have trouble with transpilation and Yarn workspaces
 
