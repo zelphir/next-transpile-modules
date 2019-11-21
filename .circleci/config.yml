@@ -16,18 +16,21 @@ jobs:
       - run: npm ci
 
       - run:
-          name: "Lint check: JS"
-          command: npm run lint
+          name: 'Lint check: JS'
+          command: npm run test:lint
 
       - run:
-          name: "Tests: unit-tests"
+          name: 'Test: formatting'
+          command: npm run test:formatting
+
+      - run:
+          name: 'Test: unit-tests'
           command: npm run test
 
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-
 
 workflows:
   version: 2

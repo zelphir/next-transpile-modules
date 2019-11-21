@@ -1,5 +1,3 @@
-/* eslint-env jest */
-
 const rewire = require('rewire');
 const anymatch = require('anymatch');
 

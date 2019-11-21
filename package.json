@@ -7,7 +7,8 @@
   "description": "Next.js plugin to transpile code from node_modules (supports TypeScript)",
   "scripts": {
     "test": "jest",
-    "lint": "eslint ."
+    "test:lint": "eslint .",
+    "test:formatting": "prettier --check \"./**/*.{js}\""
   },
   "files": [
     "index.js"
@@ -26,21 +27,23 @@
     "plugin",
     "transpile",
     "modules",
-    "babel"
+    "babel",
+    "webpack"
   ],
   "dependencies": {},
   "devDependencies": {
-    "anymatch": "2.0.0",
-    "eslint": "5.12.1",
-    "eslint-config-semistandard": "13.0.0",
-    "eslint-config-standard": "12.0.0",
-    "eslint-plugin-import": "2.15.0",
-    "eslint-plugin-jest": "22.3.0",
-    "eslint-plugin-node": "8.0.1",
-    "eslint-plugin-promise": "4.0.1",
-    "eslint-plugin-standard": "4.0.0",
-    "jest": "24.1.0",
-    "npm": "6.8.0",
+    "anymatch": "3.1.1",
+    "eslint": "6.6.0",
+    "eslint-config-prettier": "6.7.0",
+    "eslint-config-semistandard": "15.0.0",
+    "eslint-plugin-import": "2.18.2",
+    "eslint-plugin-jest": "23.0.4",
+    "eslint-plugin-node": "10.0.0",
+    "eslint-plugin-promise": "4.2.1",
+    "eslint-plugin-standard": "4.0.1",
+    "jest": "24.9.0",
+    "prettier": "1.19.1",
+    "prettier-eslint": "9.0.1",
     "rewire": "4.0.1"
   }
 }

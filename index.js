@@ -6,13 +6,18 @@ const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
  * Stolen from https://stackoverflow.com/questions/10776600/testing-for-equality-of-regular-expressions
  */
 const regexEqual = (x, y) => {
-  return (x instanceof RegExp) && (y instanceof RegExp) &&
-    (x.source === y.source) && (x.global === y.global) &&
-    (x.ignoreCase === y.ignoreCase) && (x.multiline === y.multiline);
+  return (
+    x instanceof RegExp &&
+    y instanceof RegExp &&
+    x.source === y.source &&
+    x.global === y.global &&
+    x.ignoreCase === y.ignoreCase &&
+    x.multiline === y.multiline
+  );
 };
 
 const generateIncludes = (modules) => {
-  return modules.map(module => (new RegExp(`${safePath(module)}(?!.*node_modules)`)));
+  return modules.map((module) => new RegExp(`${safePath(module)}(?!.*node_modules)`));
 };
 
 const generateExcludes = (modules) => {
@@ -34,7 +39,7 @@ const withTm = (nextConfig = {}) => {
   const excludes = generateExcludes(transpileModules);
 
   return Object.assign({}, nextConfig, {
-    webpack (config, options) {
+    webpack(config, options) {
       // Safecheck for Next < 5.0
       if (!options.defaultLoaders) {
         throw new Error(
@@ -47,13 +52,11 @@ const withTm = (nextConfig = {}) => {
 
       // Since Next.js 8.1.0, config.externals is undefined
       if (config.externals) {
-        config.externals = config.externals.map(external => {
+        config.externals = config.externals.map((external) => {
           if (typeof external !== 'function') return external;
           return (ctx, req, cb) => {
-            return includes.find(include =>
-              req.startsWith('.')
-                ? include.test(path.resolve(ctx, req))
-                : include.test(req)
+            return includes.find((include) =>
+              req.startsWith('.') ? include.test(path.resolve(ctx, req)) : include.test(req)
             )
               ? cb()
               : external(ctx, req, cb);
@@ -77,13 +80,13 @@ const withTm = (nextConfig = {}) => {
 
     // webpackDevMiddleware needs to be told to watch the changes in the
     // transpiled modules directories
-    webpackDevMiddleware (config) {
+    webpackDevMiddleware(config) {
       // Replace /node_modules/ by the new exclude RegExp (including the modules
       // that are going to be transpiled)
       // https://github.com/zeit/next.js/blob/815f2e91386a0cd046c63cbec06e4666cff85971/packages/next/server/hot-reloader.js#L335
-      const ignored = config.watchOptions.ignored.filter(
-        regexp => !regexEqual(regexp, /[\\/]node_modules[\\/]/)
-      ).concat(excludes);
+      const ignored = config.watchOptions.ignored
+        .filter((regexp) => !regexEqual(regexp, /[\\/]node_modules[\\/]/))
+        .concat(excludes);
 
       config.watchOptions.ignored = ignored;
 
