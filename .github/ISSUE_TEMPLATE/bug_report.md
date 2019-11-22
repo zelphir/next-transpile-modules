@@ -26,7 +26,7 @@ A clear and concise description of what you expected to happen.
 - Next.js version:
 - `next-transpile-modules` version:
 - Node.js version:
-- `npm` version:
+- `npm`/`yarn` version:
 - Operating System:
 
 **Additional context**
