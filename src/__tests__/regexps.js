@@ -1,7 +1,7 @@
 const rewire = require('rewire');
 const anymatch = require('anymatch');
 
-const withTmRewire = rewire('../index');
+const withTmRewire = rewire('../next-transpile-modules');
 
 const generateIncludes = withTmRewire.__get__('generateIncludes');
 const generateExcludes = withTmRewire.__get__('generateExcludes');
