@@ -1,5 +1,3 @@
-const withTM = require('next-transpile-modules');
+const withTM = require('../../../next-transpile-modules')(['lodash-es']);
 
-module.exports = withTM({
-  transpileModules: ['lodash-es']
-});
+module.exports = withTM({});

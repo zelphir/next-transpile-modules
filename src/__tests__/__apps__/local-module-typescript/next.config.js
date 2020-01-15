@@ -1,5 +1,3 @@
-const withTM = require('next-transpile-modules');
+const withTM = require('../../../next-transpile-modules')(['shared-ts']);
 
-module.exports = withTM({
-  transpileModules: ['shared-ts']
-});
+module.exports = withTM({});

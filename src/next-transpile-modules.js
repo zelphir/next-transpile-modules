@@ -28,6 +28,20 @@ const generateExcludes = (modules) => {
   ];
 };
 
+// const generateIncludes = (modules) => {
+//   return new RegExp(
+//     `node_modules${PATH_DELIMITER}(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`
+//   );
+// };
+
+// const generateExcludes = (modules) => {
+//   return [
+//     new RegExp(
+//       `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules))`
+//     )
+//   ];
+// };
+
 /**
  * On Windows, the Regex won't match as Webpack tries to resolve the
  * paths of the modules. So we need to check for \\ and /
@@ -37,8 +51,7 @@ const safePath = (module) => module.split('/').join(PATH_DELIMITER);
 /**
  * Actual Next.js plugin
  */
-const withTm = (nextConfig = {}) => {
-  const { transpileModules = [] } = nextConfig;
+const withTm = (transpileModules = []) => (nextConfig = {}) => {
   const includes = generateIncludes(transpileModules);
   const excludes = generateExcludes(transpileModules);
 
