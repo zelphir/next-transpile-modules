@@ -17,11 +17,17 @@ const regexEqual = (x, y) => {
 };
 
 const generateIncludes = (modules) => {
-  return modules.map((module) => new RegExp(`${safePath(module)}(?!.*node_modules)`));
+  return new RegExp(
+    `(node_modules${PATH_DELIMITER}${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`
+  );
 };
 
 const generateExcludes = (modules) => {
-  return [new RegExp(`node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})(?!.*node_modules))`)];
+  return [
+    new RegExp(
+      `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules))`
+    )
+  ];
 };
 
 /**
@@ -47,7 +53,10 @@ const withTm = (nextConfig = {}) => {
         );
       }
 
-      // Avoid Webpack to resolve transpiled modules path to their real path
+      // Avoid Webpack to resolve transpiled modules path to their real path as
+      // we want to test modules from node_modules only. If it was enabled,
+      // modules in node_modules installed via symlink would then not be
+      // transpiled.
       config.resolve.symlinks = false;
 
       // Since Next.js 8.1.0, config.externals is undefined
