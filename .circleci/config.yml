@@ -23,7 +23,7 @@ jobs:
 
       - run:
           name: Install tests apps dependencies
-          command: npm ci --prefix=src/__tests__/__apps__/basic && npm ci --prefix=src/__tests__/__apps__/custom-error
+          command: npm ci --prefix=src/__tests__/__apps__/basic && npm ci --prefix=src/__tests__/__apps__/with-typescript
 
       - run:
           name: 'Lint check: JS'
