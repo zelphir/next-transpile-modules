@@ -30,8 +30,12 @@
     "babel",
     "webpack"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "micromatch": "^4.0.2",
+    "slash": "^3.0.0"
+  },
   "devDependencies": {
+    "@types/jest-environment-puppeteer": "^4.3.1",
     "anymatch": "2.0.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.9.0",
@@ -42,8 +46,11 @@
     "eslint-plugin-promise": "4.2.1",
     "eslint-plugin-standard": "4.0.1",
     "jest": "24.9.0",
+    "jest-environment-puppeteer": "^4.4.0",
+    "jest-puppeteer": "^4.4.0",
     "prettier": "1.19.1",
     "prettier-eslint": "9.0.1",
+    "puppeteer": "^2.0.0",
     "rewire": "4.0.1"
   }
 }

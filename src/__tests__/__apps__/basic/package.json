@@ -1,0 +1,20 @@
+{
+  "name": "basic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "next": "^9.1.7",
+    "next-transpile-modules": "^2.3.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "shared": "file:../_shared"
+  }
+}
