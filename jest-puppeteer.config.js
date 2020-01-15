@@ -20,7 +20,7 @@ module.exports = {
       port: 3001
     },
     {
-      command: `npm run build --prefix=${localModuleTypescriptAppPath} && npm run start --prefix=${localModuleTypescriptAppPath} -- --port 3002`,
+      command: `npm run build --prefix=${npmModuleTypescriptAppPath} && npm run start --prefix=${localModuleTypescriptAppPath} -- --port 3002`,
       launchTimeout: 50000,
       port: 3002
     }
