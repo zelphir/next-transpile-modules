@@ -76,14 +76,9 @@ module.exports = withPlugins([withTM], {
 
 ### CSS support
 
-Since `next-transpile-modules@3.0` and `next@>9.2`, this plugin will also transpile CSS included in the transpiled packages:
+Since `next-transpile-modules@3.0` and `next@>9.2`, this plugin will also transpile CSS included in your transpiled packages:
 
-```js
-// next.config.js
-const withTM = require('next-transpile-modules')(['shared-ui']);
-
-// ...
-```
+In your transpiled package:
 
 ```js
 // shared-ui/components/Button.js
@@ -108,7 +103,14 @@ export default Button;
 }
 ```
 
-CSS Modules:
+In your app:
+
+```js
+// next.config.js
+const withTM = require('next-transpile-modules')(['shared-ui']);
+
+// ...
+```
 
 ```jsx
 // pages/home.jsx
