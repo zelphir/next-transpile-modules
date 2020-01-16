@@ -82,7 +82,7 @@ const withTm = (transpileModules = []) => (nextConfig = {}) => {
         include: includes
       });
 
-      // Support CSS modules in node_modules
+      // Support CSS modules + global in node_modules
       // TODO ask Next.js maintainer to expose the css-loader via defaultLoaders
       const nextCssLoaders = config.module.rules.find((rule) => typeof rule.oneOf === 'object');
 
@@ -106,8 +106,6 @@ const withTm = (transpileModules = []) => (nextConfig = {}) => {
           nextErrorCssLoader.exclude = includes;
         }
       }
-
-      // .css (global CSS)
 
       // Overload the Webpack config if it was already overloaded
       if (typeof nextConfig.webpack === 'function') {
