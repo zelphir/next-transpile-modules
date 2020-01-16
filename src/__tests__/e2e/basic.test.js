@@ -68,9 +68,7 @@ describe('css-module transpilation', () => {
     const content = await page.$eval('button', (e) => e.textContent);
     expect(content).toBe('Styled button');
 
-    const el = await page.$('button');
-    const className = await el.getProperty('className');
-
+    const className = await page.$eval('button', (e) => e.classList[0]);
     expect(className.includes('Button_error__')).toBe(true);
   });
 });
