@@ -1,5 +1,8 @@
 # Next.js + Transpile `node_modules`
 
+[![Build Status](https://img.shields.io/circleci/project/github/martpie/next-transpile-modules.svg)](https://circleci.com/gh/martpie/next-transpile-modules)
+![Dependencies](https://img.shields.io/david/martpie/next-transpile-modules)
+
 Transpile untranspiled modules from `node_modules` using the Next.js Babel configuration.
 Makes it easy to have local libraries and keep a slick, manageable dev experience.
 
