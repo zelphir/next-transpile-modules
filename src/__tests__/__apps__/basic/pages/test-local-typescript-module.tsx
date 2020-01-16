@@ -1,8 +1,8 @@
 import React from 'react';
 import { add } from 'shared-ts/utils/calc';
 
-const HomePage = () => {
-  return <h1>The answer is {add(40, 2)}</h1>;
+const HomePage: React.FC = () => {
+  return <h1>The answer is {add(40, 3)}</h1>;
 };
 
 export default HomePage;

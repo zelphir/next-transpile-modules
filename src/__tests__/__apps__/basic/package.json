@@ -11,9 +11,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "next": "^9.1.7",
+    "lodash-es": "^4.17.15",
+    "next": "9.2.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "shared": "file:../_shared"
+    "shared": "file:../_shared",
+    "shared-ts": "file:../_shared-ts"
+  },
+  "devDependencies": {
+    "@types/react": "^16.9.17",
+    "@types/react-dom": "^16.9.4"
   }
 }

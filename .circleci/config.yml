@@ -3,7 +3,7 @@ jobs:
   test:
     docker:
       - image: node:10
-    working_directory: ~/lib
+    working_directory: ~/ci
 
     steps:
       - checkout
@@ -24,12 +24,10 @@ jobs:
       - run:
           name: Install tests apps dependencies
           command: |
-            npm ci --prefix=src/__tests__/__apps__/local-module &&
-            npm ci --prefix=src/__tests__/__apps__/local-module-typescript &&
-            npm ci --prefix=src/__tests__/__apps__/npm-module
+            npm ci --prefix=src/__tests__/__apps__/basic
 
       - run:
-          name: 'Lint check: JS'
+          name: 'Test: linting'
           command: npm run test:lint
 
       - run:
@@ -37,7 +35,7 @@ jobs:
           command: npm run test:formatting
 
       - run:
-          name: 'Test: unit-tests'
+          name: 'Test: unit-tests & end-to-end'
           command: npm run test
 
       - save_cache:
