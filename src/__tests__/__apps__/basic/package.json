@@ -16,7 +16,8 @@
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "shared": "file:../_shared",
-    "shared-ts": "file:../_shared-ts"
+    "shared-ts": "file:../_shared-ts",
+    "shared-ui": "file:../_shared-ui"
   },
   "devDependencies": {
     "@types/react": "^16.9.17",

@@ -35,7 +35,7 @@ jobs:
           command: npm run test:formatting
 
       - run:
-          name: 'Test: unit-tests & end-to-end'
+          name: 'Test: unit & end-to-end tests'
           command: npm run test
 
       - save_cache:

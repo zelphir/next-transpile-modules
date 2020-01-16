@@ -52,10 +52,9 @@ With `next-compose-plugins`:
 ```js
 const withPlugins = require('next-compose-plugins');
 
-const withTypescript = require('@zeit/next-typescript');
 const withTM = require('next-transpile-modules')(['some-module', 'and-another']);
 
-module.exports = withPlugins([withTM, withTypescript], {
+module.exports = withPlugins([withTM], {
   // ...
 });
 ```
@@ -66,6 +65,7 @@ module.exports = withPlugins([withTM, withTypescript], {
 
 - it is maintained, `@weco`'s seems dead
 - it supports TypeScript
+- it supports CSS modules (since Next.js 9.2)
 
 ### I have trouble making it work with Next.js 7
 
