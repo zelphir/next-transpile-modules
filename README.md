@@ -36,27 +36,106 @@ yarn add next-transpile-modules
 
 ## Usage
 
-Classic:
+### Classic:
 
 ```js
 // next.config.js
-const withTM = require('next-transpile-modules')(['somemodule', 'and-another']);
+const withTM = require('next-transpile-modules')(['somemodule', 'and-another']); // pass the modules you would like to see transpiled
 
 module.exports = withTM();
 ```
 
 **note:** please declare `withTM` as your last plugin (the "most nested" one).
 
-With `next-compose-plugins`:
+### Scoped packages
+
+You can include scoped packages or nested ones:
+
+```js
+const withTM = require('next-transpile-modules')(['@shared/ui', '@shared/utils']);
+
+// ...
+```
+
+```js
+const withTM = require('next-transpile-modules')(['styleguide/components']);
+
+// ...
+```
+
+### With `next-compose-plugins`:
 
 ```js
 const withPlugins = require('next-compose-plugins');
-
 const withTM = require('next-transpile-modules')(['some-module', 'and-another']);
 
 module.exports = withPlugins([withTM], {
   // ...
 });
+```
+
+### CSS support
+
+Since `next-transpile-modules@3.0` and `next@>9.2`, this plugin will also transpile CSS included in the transpiled packages:
+
+```js
+// next.config.js
+const withTM = require('next-transpile-modules')(['shared-ui']);
+
+// ...
+```
+
+```js
+// shared-ui/components/Button.js
+import styles from './Button.module.css';
+
+function Button(props) {
+  return (
+    <button type='button' className={styles.error}>
+      {props.children}
+    </button>
+  );
+}
+
+export default Button;
+```
+
+```css
+/* shared-ui/components/Button.module.js */
+.error {
+  color: white;
+  background-color: red;
+}
+```
+
+CSS Modules:
+
+```jsx
+// pages/home.jsx
+import React from 'react';
+import Button from 'shared-ui/components/Button';
+
+const HomePage = () => {
+  return (
+    <main>
+      {/* will output <button class="Button_error__xxxxx"> */}
+      <Button>Styled button</Button>
+    </main>
+  );
+};
+
+export default HomePage;
+```
+
+It also supports global CSS import packages located in `node_modules`:
+
+```jsx
+// pages/_app.js
+import 'shared-ui/styles/global.css'; // will be imported globally
+
+export default function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />;
+}
 ```
 
 ## FAQ
