@@ -18,7 +18,10 @@ const regexEqual = (x, y) => {
 };
 
 const generateIncludes = (modules) => {
-  return [new RegExp(`(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`)];
+  return [
+    new RegExp(`(${modules.map(safePath).join('|')})$`),
+    new RegExp(`(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`)
+  ];
 };
 
 const generateExcludes = (modules) => {
