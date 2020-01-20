@@ -1,5 +1,8 @@
 # Next.js + Transpile `node_modules`
 
+[![Build Status](https://img.shields.io/circleci/project/github/martpie/next-transpile-modules.svg)](https://circleci.com/gh/martpie/next-transpile-modules)
+![Dependencies](https://img.shields.io/david/martpie/next-transpile-modules)
+
 Transpile untranspiled modules from `node_modules` using the Next.js Babel configuration.
 Makes it easy to have local libraries and keep a slick, manageable dev experience.
 
@@ -17,7 +20,8 @@ What this plugin **does not aim** to solve:
 ## Compatibility table
 
 | Next.js version | Plugin version |
-|-----------------|----------------|
+| --------------- | -------------- |
+| Next.js 9.2     | 3.x            |
 | Next.js 8 / 9   | 2.x            |
 | Next.js 6 / 7   | 1.x            |
 
@@ -35,48 +39,108 @@ yarn add next-transpile-modules
 
 ## Usage
 
-Classic:
+### Classic:
 
 ```js
 // next.config.js
-const withTM = require('next-transpile-modules');
+const withTM = require('next-transpile-modules')(['somemodule', 'and-another']); // pass the modules you would like to see transpiled
 
-module.exports = withTM({
-  transpileModules: ['somemodule', 'and-another']
-});
+module.exports = withTM();
 ```
 
 **note:** please declare `withTM` as your last plugin (the "most nested" one).
 
-Example with `next-typescript`:
+### Scoped packages
+
+You can include scoped packages or nested ones:
 
 ```js
-const withTypescript = require('@zeit/next-typescript');
-const withTM = require('next-transpile-modules');
+const withTM = require('next-transpile-modules')(['@shared/ui', '@shared/utils']);
 
-module.exports = withTypescript(
-  withTM({
-    transpileModules: ['somemodule', 'and-another']
-  })
-);
+// ...
 ```
 
-With `next-compose-plugins`:
+```js
+const withTM = require('next-transpile-modules')(['styleguide/components']);
+
+// ...
+```
+
+### With `next-compose-plugins`:
 
 ```js
 const withPlugins = require('next-compose-plugins');
+const withTM = require('next-transpile-modules')(['some-module', 'and-another']);
 
-const withTypescript = require('@zeit/next-typescript');
-const withTM = require('next-transpile-modules');
-
-module.exports = withPlugins([
-  [withTM, {
-    transpileModules: ['some-module', 'and-another'],
-  }],
-  withTypescript,
-], {
+module.exports = withPlugins([withTM], {
   // ...
 });
+```
+
+### CSS support
+
+Since `next-transpile-modules@3.0` and `next@>9.2`, this plugin will also transpile CSS included in your transpiled packages:
+
+In your transpiled package:
+
+```js
+// shared-ui/components/Button.js
+import styles from './Button.module.css';
+
+function Button(props) {
+  return (
+    <button type='button' className={styles.error}>
+      {props.children}
+    </button>
+  );
+}
+
+export default Button;
+```
+
+```css
+/* shared-ui/components/Button.module.js */
+.error {
+  color: white;
+  background-color: red;
+}
+```
+
+In your app:
+
+```js
+// next.config.js
+const withTM = require('next-transpile-modules')(['shared-ui']);
+
+// ...
+```
+
+```jsx
+// pages/home.jsx
+import React from 'react';
+import Button from 'shared-ui/components/Button';
+
+const HomePage = () => {
+  return (
+    <main>
+      {/* will output <button class="Button_error__xxxxx"> */}
+      <Button>Styled button</Button>
+    </main>
+  );
+};
+
+export default HomePage;
+```
+
+It also supports global CSS import packages located in `node_modules`:
+
+```jsx
+// pages/_app.js
+import 'shared-ui/styles/global.css'; // will be imported globally
+
+export default function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />;
+}
 ```
 
 ## FAQ
@@ -85,6 +149,7 @@ module.exports = withPlugins([
 
 - it is maintained, `@weco`'s seems dead
 - it supports TypeScript
+- it supports CSS modules (since Next.js 9.2)
 
 ### I have trouble making it work with Next.js 7
 
@@ -94,7 +159,7 @@ If you have a transpilation error when loading a page, check that your `babel.co
 
 ### I have trouble with transpilation and Flow/TypeScript
 
-In your Next.js app, make sure you use a `babel.config.js` and not a `.babelrc` as Babel's configuration file (see explanation below). 
+In your Next.js app, make sure you use a `babel.config.js` and not a `.babelrc` as Babel's configuration file (see explanation below).
 
 **Since Next.js 9, you probably don't need that file anymore**, as TypeScript is supported natively.
 
@@ -121,19 +186,18 @@ So you are probably [using it wrong](https://github.com/martpie/next-transpile-m
 You may need to tell your Webpack configuration how to properly resolve your scoped packages, as they won't be installed in your Next.js directory, but the root of your Lerna setup.
 
 ```js
-const withTM = require('next-transpile-modules');
+const withTM = require('next-transpile-modules')(['@your-project/shared', '@your-project/styleguide']);
 
 module.exports = withTM({
-  transpileModules: ['@your-project/shared', '@your-project/styleguide'],
   webpack: (config, options) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       // Will make webpack look for these modules in parent directories
       '@your-project/shared': require.resolve('@your-project/shared'),
-      '@your-project/styleguide': require.resolve('@your-project/styleguide'),
+      '@your-project/styleguide': require.resolve('@your-project/styleguide')
       // ...
     };
     return config;
-  },
+  }
 });
 ```

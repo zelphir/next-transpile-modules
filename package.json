@@ -1,7 +1,7 @@
 {
   "name": "next-transpile-modules",
   "version": "2.3.1",
-  "main": "index.js",
+  "main": "src/next-transpile-modules.js",
   "license": "MIT",
   "author": "Pierre de la Martinière <pierre.de.la.martiniere@gmail.com>",
   "description": "Next.js plugin to transpile code from node_modules (supports TypeScript)",
@@ -30,20 +30,27 @@
     "babel",
     "webpack"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "micromatch": "^4.0.2",
+    "slash": "^3.0.0"
+  },
   "devDependencies": {
-    "anymatch": "3.1.1",
-    "eslint": "6.6.0",
-    "eslint-config-prettier": "6.7.0",
+    "@types/jest-environment-puppeteer": "^4.3.1",
+    "anymatch": "2.0.0",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.9.0",
     "eslint-config-semistandard": "15.0.0",
-    "eslint-plugin-import": "2.18.2",
-    "eslint-plugin-jest": "23.0.4",
-    "eslint-plugin-node": "10.0.0",
+    "eslint-plugin-import": "2.20.0",
+    "eslint-plugin-jest": "23.6.0",
+    "eslint-plugin-node": "11.0.0",
     "eslint-plugin-promise": "4.2.1",
     "eslint-plugin-standard": "4.0.1",
     "jest": "24.9.0",
+    "jest-environment-puppeteer": "^4.4.0",
+    "jest-puppeteer": "^4.4.0",
     "prettier": "1.19.1",
     "prettier-eslint": "9.0.1",
+    "puppeteer": "^2.0.0",
     "rewire": "4.0.1"
   }
 }

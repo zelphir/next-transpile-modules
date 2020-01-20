@@ -1,4 +1,5 @@
 const path = require('path');
+const util = require('util');
 
 const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
 
@@ -17,11 +18,15 @@ const regexEqual = (x, y) => {
 };
 
 const generateIncludes = (modules) => {
-  return modules.map((module) => new RegExp(`${safePath(module)}(?!.*node_modules)`));
+  return [new RegExp(`(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`)];
 };
 
 const generateExcludes = (modules) => {
-  return [new RegExp(`node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})(?!.*node_modules))`)];
+  return [
+    new RegExp(
+      `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules))`
+    )
+  ];
 };
 
 /**
@@ -33,13 +38,16 @@ const safePath = (module) => module.split('/').join(PATH_DELIMITER);
 /**
  * Actual Next.js plugin
  */
-const withTm = (nextConfig = {}) => {
-  const { transpileModules = [] } = nextConfig;
+const withTm = (transpileModules = []) => (nextConfig = {}) => {
   const includes = generateIncludes(transpileModules);
   const excludes = generateExcludes(transpileModules);
 
   return Object.assign({}, nextConfig, {
     webpack(config, options) {
+      // console.log(util.inspect(config.module.rules, false, null, true /* enable colors */));
+      // console.log('=================================');
+      // console.log(options.defaultLoaders);
+
       // Safecheck for Next < 5.0
       if (!options.defaultLoaders) {
         throw new Error(
@@ -47,7 +55,10 @@ const withTm = (nextConfig = {}) => {
         );
       }
 
-      // Avoid Webpack to resolve transpiled modules path to their real path
+      // Avoid Webpack to resolve transpiled modules path to their real path as
+      // we want to test modules from node_modules only. If it was enabled,
+      // modules in node_modules installed via symlink would then not be
+      // transpiled.
       config.resolve.symlinks = false;
 
       // Since Next.js 8.1.0, config.externals is undefined
@@ -64,13 +75,39 @@ const withTm = (nextConfig = {}) => {
         });
       }
 
-      // Add a rule to include and parse all modules
+      // Add a rule to include and parse all modules (js & ts)
       config.module.rules.push({
         test: /\.+(js|jsx|ts|tsx)$/,
         loader: options.defaultLoaders.babel,
         include: includes
       });
 
+      // Support CSS modules + global in node_modules
+      // TODO ask Next.js maintainer to expose the css-loader via defaultLoaders
+      const nextCssLoaders = config.module.rules.find((rule) => typeof rule.oneOf === 'object');
+
+      // .module.css
+      if (nextCssLoaders) {
+        const nextCssLoader = nextCssLoaders.oneOf.find(
+          (rule) => rule.sideEffects === false && regexEqual(rule.test, /\.module\.css$/)
+        );
+
+        if (nextCssLoader) {
+          nextCssLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
+          nextCssLoader.issuer.exclude = excludes;
+        }
+
+        // Hack our way to disable errors on node_modules CSS modules
+        const nextErrorCssLoader = nextCssLoaders.oneOf.find(
+          (rule) => rule.use && rule.use.loader === 'error-loader' && regexEqual(rule.test, /\.module\.css$/)
+        );
+
+        if (nextErrorCssLoader) {
+          nextErrorCssLoader.exclude = includes;
+        }
+      }
+
+      // Overload the Webpack config if it was already overloaded
       if (typeof nextConfig.webpack === 'function') {
         return nextConfig.webpack(config, options);
       }
