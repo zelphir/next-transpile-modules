@@ -22,6 +22,12 @@ describe('generateIncludes', () => {
     expect(anymatch(includes, '/users/pierre/project/node_modules/@scoped/something/sub/test.js')).toBe(true);
   });
 
+  test('should match module paths', () => {
+    expect(anymatch(includes, '/users/pierre/project/node_modules/shared')).toBe(true);
+    expect(anymatch(includes, '/users/pierre/project/node_modules/and-another')).toBe(true);
+    expect(anymatch(includes, '/users/pierre/project/node_modules/@scoped/something')).toBe(true);
+  })
+
   test('should NOT match unreferenced modules', () => {
     expect(anymatch(includes, '/users/pierre/project/node_modules/and-yet-another/test.js')).toBe(false);
   });
