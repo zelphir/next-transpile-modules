@@ -6,7 +6,7 @@
 Transpile untranspiled modules from `node_modules` using the Next.js Babel configuration.
 Makes it easy to have local libraries and keep a slick, manageable dev experience.
 
-## What problem does it solve?
+## What problems does it solve?
 
 This plugin aims to solve the following challenges:
 
@@ -79,7 +79,7 @@ module.exports = withPlugins([withTM], {
 
 ### CSS support
 
-Since `next-transpile-modules@3.0` and `next@>9.2`, this plugin will also transpile CSS included in your transpiled packages:
+Since `next-transpile-modules@3` and `next@>9.2`, this plugin will also transpile CSS included in your transpiled packages:
 
 In your transpiled package:
 
