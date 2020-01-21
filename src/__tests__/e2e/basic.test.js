@@ -25,6 +25,9 @@ describe('local-module transpilation', () => {
 
     const content = await page.$eval('h1', (e) => e.textContent);
     expect(content).toBe('The answer is 42');
+
+    const otherContent = await page.$eval('h2', (e) => e.textContent);
+    expect(otherContent).toBe('The answer is not 80');
   });
 });
 
