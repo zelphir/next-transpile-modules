@@ -1,8 +1,6 @@
-name: Node.js Package
+name: Tests
 
-on:
-  release:
-    types: [created]
+on: [push]
 
 jobs:
   build:
@@ -13,8 +11,29 @@ jobs:
         node: [10, 12]
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
         with:
-          node-version: 12
-      - run: npm ci
-      - run: npm test
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Puppeteer dependencies
+        run: bash .github/workflows/setup_puppeteer.sh
+        if: startsWith(matrix.os,'ubuntu')
+
+      - name: Install tests apps dependencies
+        run: npm ci --prefix=src/__tests__/__apps__/basic
+
+      - name: 'Test: unit & end-to-end tests'
+        run: npm test
+
+      - name: 'Test: linting'
+        run: npm run test:lint
+
+      - name: 'Test: formatting'
+        run: npm run test:formatting
+        env:
+          CI: true
