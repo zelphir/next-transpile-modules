@@ -26,7 +26,7 @@ const generateIncludes = (modules) => {
 const generateExcludes = (modules) => {
   return [
     new RegExp(
-      `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules))`
+      `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})(${PATH_DELIMITER}|$)(?!.*node_modules))`
     )
   ];
 };
