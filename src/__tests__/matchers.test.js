@@ -22,11 +22,11 @@ describe('generateIncludes', () => {
     expect(anymatch(includes, '/users/pierre/project/node_modules/@scoped/something/sub/test.js')).toBe(true);
   });
 
-  test('should match module paths', () => {
+  test("SHOULD match module paths (package.json's main field)", () => {
     expect(anymatch(includes, '/users/pierre/project/node_modules/shared')).toBe(true);
     expect(anymatch(includes, '/users/pierre/project/node_modules/and-another')).toBe(true);
     expect(anymatch(includes, '/users/pierre/project/node_modules/@scoped/something')).toBe(true);
-  })
+  });
 
   test('should NOT match unreferenced modules', () => {
     expect(anymatch(includes, '/users/pierre/project/node_modules/and-yet-another/test.js')).toBe(false);
@@ -65,6 +65,12 @@ describe('generateExcludes', () => {
     expect(anymatch(excludes, '/users/pierre/project/node_modules/shared/sub/test.js')).toBe(false);
     expect(anymatch(excludes, '/users/pierre/project/node_modules/and-another/sub/test.js')).toBe(false);
     expect(anymatch(excludes, '/users/pierre/project/node_modules/@scoped/something/sub/test.js')).toBe(false);
+  });
+
+  test("should NOT match module paths (package.json's main field)", () => {
+    expect(anymatch(excludes, '/users/pierre/project/node_modules/shared')).toBe(false);
+    expect(anymatch(excludes, '/users/pierre/project/node_modules/and-another')).toBe(false);
+    expect(anymatch(excludes, '/users/pierre/project/node_modules/@scoped/something')).toBe(false);
   });
 
   test('SHOULD match unreferenced modules', () => {

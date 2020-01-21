@@ -1,5 +1,4 @@
 const path = require('path');
-const util = require('util');
 
 const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
 
@@ -27,7 +26,7 @@ const generateIncludes = (modules) => {
 const generateExcludes = (modules) => {
   return [
     new RegExp(
-      `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules))`
+      `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})(${PATH_DELIMITER}|$)(?!.*node_modules))`
     )
   ];
 };
@@ -47,10 +46,6 @@ const withTm = (transpileModules = []) => (nextConfig = {}) => {
 
   return Object.assign({}, nextConfig, {
     webpack(config, options) {
-      // console.log(util.inspect(config.module.rules, false, null, true /* enable colors */));
-      // console.log('=================================');
-      // console.log(options.defaultLoaders);
-
       // Safecheck for Next < 5.0
       if (!options.defaultLoaders) {
         throw new Error(
