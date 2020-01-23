@@ -40,98 +40,102 @@ const safePath = (module) => module.split('/').join(PATH_DELIMITER);
 /**
  * Actual Next.js plugin
  */
-const withTm = (transpileModules = []) => (nextConfig = {}) => {
-  const includes = generateIncludes(transpileModules);
-  const excludes = generateExcludes(transpileModules);
+const withTmInitializer = (transpileModules = []) => {
+  const withTM = (nextConfig = {}) => {
+    const includes = generateIncludes(transpileModules);
+    const excludes = generateExcludes(transpileModules);
 
-  return Object.assign({}, nextConfig, {
-    webpack(config, options) {
-      // Safecheck for Next < 5.0
-      if (!options.defaultLoaders) {
-        throw new Error(
-          'This plugin is not compatible with Next.js versions below 5.0.0 https://err.sh/next-plugins/upgrade'
-        );
-      }
+    return Object.assign({}, nextConfig, {
+      webpack(config, options) {
+        // Safecheck for Next < 5.0
+        if (!options.defaultLoaders) {
+          throw new Error(
+            'This plugin is not compatible with Next.js versions below 5.0.0 https://err.sh/next-plugins/upgrade'
+          );
+        }
 
-      // Avoid Webpack to resolve transpiled modules path to their real path as
-      // we want to test modules from node_modules only. If it was enabled,
-      // modules in node_modules installed via symlink would then not be
-      // transpiled.
-      config.resolve.symlinks = false;
+        // Avoid Webpack to resolve transpiled modules path to their real path as
+        // we want to test modules from node_modules only. If it was enabled,
+        // modules in node_modules installed via symlink would then not be
+        // transpiled.
+        config.resolve.symlinks = false;
 
-      // Since Next.js 8.1.0, config.externals is undefined
-      if (config.externals) {
-        config.externals = config.externals.map((external) => {
-          if (typeof external !== 'function') return external;
-          return (ctx, req, cb) => {
-            return includes.find((include) =>
-              req.startsWith('.') ? include.test(path.resolve(ctx, req)) : include.test(req)
-            )
-              ? cb()
-              : external(ctx, req, cb);
-          };
+        // Since Next.js 8.1.0, config.externals is undefined
+        if (config.externals) {
+          config.externals = config.externals.map((external) => {
+            if (typeof external !== 'function') return external;
+            return (ctx, req, cb) => {
+              return includes.find((include) =>
+                req.startsWith('.') ? include.test(path.resolve(ctx, req)) : include.test(req)
+              )
+                ? cb()
+                : external(ctx, req, cb);
+            };
+          });
+        }
+
+        // Add a rule to include and parse all modules (js & ts)
+        config.module.rules.push({
+          test: /\.+(js|jsx|ts|tsx)$/,
+          loader: options.defaultLoaders.babel,
+          include: includes
         });
-      }
 
-      // Add a rule to include and parse all modules (js & ts)
-      config.module.rules.push({
-        test: /\.+(js|jsx|ts|tsx)$/,
-        loader: options.defaultLoaders.babel,
-        include: includes
-      });
+        // Support CSS modules + global in node_modules
+        // TODO ask Next.js maintainer to expose the css-loader via defaultLoaders
+        const nextCssLoaders = config.module.rules.find((rule) => typeof rule.oneOf === 'object');
 
-      // Support CSS modules + global in node_modules
-      // TODO ask Next.js maintainer to expose the css-loader via defaultLoaders
-      const nextCssLoaders = config.module.rules.find((rule) => typeof rule.oneOf === 'object');
+        // .module.css
+        if (nextCssLoaders) {
+          const nextCssLoader = nextCssLoaders.oneOf.find(
+            (rule) => rule.sideEffects === false && regexEqual(rule.test, /\.module\.css$/)
+          );
 
-      // .module.css
-      if (nextCssLoaders) {
-        const nextCssLoader = nextCssLoaders.oneOf.find(
-          (rule) => rule.sideEffects === false && regexEqual(rule.test, /\.module\.css$/)
-        );
+          if (nextCssLoader) {
+            nextCssLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
+            nextCssLoader.issuer.exclude = excludes;
+          }
 
-        if (nextCssLoader) {
-          nextCssLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
-          nextCssLoader.issuer.exclude = excludes;
+          // Hack our way to disable errors on node_modules CSS modules
+          const nextErrorCssLoader = nextCssLoaders.oneOf.find(
+            (rule) => rule.use && rule.use.loader === 'error-loader' && regexEqual(rule.test, /\.module\.css$/)
+          );
+
+          if (nextErrorCssLoader) {
+            nextErrorCssLoader.exclude = includes;
+          }
         }
 
-        // Hack our way to disable errors on node_modules CSS modules
-        const nextErrorCssLoader = nextCssLoaders.oneOf.find(
-          (rule) => rule.use && rule.use.loader === 'error-loader' && regexEqual(rule.test, /\.module\.css$/)
-        );
-
-        if (nextErrorCssLoader) {
-          nextErrorCssLoader.exclude = includes;
+        // Overload the Webpack config if it was already overloaded
+        if (typeof nextConfig.webpack === 'function') {
+          return nextConfig.webpack(config, options);
         }
+
+        return config;
+      },
+
+      // webpackDevMiddleware needs to be told to watch the changes in the
+      // transpiled modules directories
+      webpackDevMiddleware(config) {
+        // Replace /node_modules/ by the new exclude RegExp (including the modules
+        // that are going to be transpiled)
+        // https://github.com/zeit/next.js/blob/815f2e91386a0cd046c63cbec06e4666cff85971/packages/next/server/hot-reloader.js#L335
+        const ignored = config.watchOptions.ignored
+          .filter((regexp) => !regexEqual(regexp, /[\\/]node_modules[\\/]/))
+          .concat(excludes);
+
+        config.watchOptions.ignored = ignored;
+
+        if (typeof nextConfig.webpackDevMiddleware === 'function') {
+          return nextConfig.webpackDevMiddleware(config);
+        }
+
+        return config;
       }
+    });
+  };
 
-      // Overload the Webpack config if it was already overloaded
-      if (typeof nextConfig.webpack === 'function') {
-        return nextConfig.webpack(config, options);
-      }
-
-      return config;
-    },
-
-    // webpackDevMiddleware needs to be told to watch the changes in the
-    // transpiled modules directories
-    webpackDevMiddleware(config) {
-      // Replace /node_modules/ by the new exclude RegExp (including the modules
-      // that are going to be transpiled)
-      // https://github.com/zeit/next.js/blob/815f2e91386a0cd046c63cbec06e4666cff85971/packages/next/server/hot-reloader.js#L335
-      const ignored = config.watchOptions.ignored
-        .filter((regexp) => !regexEqual(regexp, /[\\/]node_modules[\\/]/))
-        .concat(excludes);
-
-      config.watchOptions.ignored = ignored;
-
-      if (typeof nextConfig.webpackDevMiddleware === 'function') {
-        return nextConfig.webpackDevMiddleware(config);
-      }
-
-      return config;
-    }
-  });
+  return withTM;
 };
 
-module.exports = withTm;
+module.exports = withTmInitializer;
