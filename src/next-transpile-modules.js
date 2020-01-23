@@ -42,6 +42,8 @@ const safePath = (module) => module.split('/').join(PATH_DELIMITER);
  */
 const withTmInitializer = (transpileModules = []) => {
   const withTM = (nextConfig = {}) => {
+    if (transpileModules.length === 0) return nextConfig;
+
     const includes = generateIncludes(transpileModules);
     const excludes = generateExcludes(transpileModules);
 
