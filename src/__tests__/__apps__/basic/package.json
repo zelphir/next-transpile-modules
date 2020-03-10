@@ -15,6 +15,7 @@
     "next": "9.3.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
+    "sass": "^1.26.2",
     "shared": "file:../_shared",
     "shared-ts": "file:../_shared-ts",
     "shared-ui": "file:../_shared-ui"
