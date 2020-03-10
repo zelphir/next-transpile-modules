@@ -1,4 +1,5 @@
 const path = require('path');
+const util = require('util');
 
 const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
 
@@ -93,18 +94,47 @@ const withTmInitializer = (transpileModules = []) => {
             (rule) => rule.sideEffects === false && regexEqual(rule.test, /\.module\.css$/)
           );
 
+          const nextSassLoader = nextCssLoaders.oneOf.find(
+            (rule) => rule.sideEffects === false && regexEqual(rule.test, /\.module\.(scss|sass)$/)
+          );
+
           if (nextCssLoader) {
             nextCssLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
             nextCssLoader.issuer.exclude = excludes;
           }
 
+          if (nextSassLoader) {
+            nextSassLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
+            nextSassLoader.issuer.exclude = excludes;
+          }
+
           // Hack our way to disable errors on node_modules CSS modules
-          const nextErrorCssLoader = nextCssLoaders.oneOf.find(
-            (rule) => rule.use && rule.use.loader === 'error-loader' && regexEqual(rule.test, /\.module\.css$/)
+          const nextErrorCssModuleLoader = nextCssLoaders.oneOf.find(
+            (rule) =>
+              rule.use &&
+              rule.use.loader === 'error-loader' &&
+              rule.use.options &&
+              rule.use.options.reason ===
+                'CSS Modules \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
+                  'Read more: https://err.sh/next.js/css-modules-npm'
           );
 
-          if (nextErrorCssLoader) {
-            nextErrorCssLoader.exclude = includes;
+          if (nextErrorCssModuleLoader) {
+            nextErrorCssModuleLoader.exclude = includes;
+          }
+
+          const nextErrorCssGlobalLoader = nextCssLoaders.oneOf.find(
+            (rule) =>
+              rule.use &&
+              rule.use.loader === 'error-loader' &&
+              rule.use.options &&
+              rule.use.options.reason ===
+                'Global CSS \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
+                  'Read more: https://err.sh/next.js/css-npm'
+          );
+
+          if (nextErrorCssGlobalLoader) {
+            nextErrorCssGlobalLoader.exclude = includes;
           }
         }
 
