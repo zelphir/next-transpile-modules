@@ -201,3 +201,30 @@ module.exports = withTM({
   }
 });
 ```
+
+### I have trouble with duplicated dependencies
+
+It can happen that when using `next-transpile-modules` with a local package and `npm`, you end up with duplicated dependencies in your final Next.js build. It is important to understand _why_ it happens.
+
+Let's take the following setup: one Next.js app ("Consumer"), and one Styleguide library.
+
+You will probably have `react` as a `peerDependencies` and as a `devDependecy` of the Styleguide. If you use `npm i`, it will create a symlink to your Styleguide package in your "Consumer" `node_modules`.
+
+The thing is in this shared package, you also have a `node_modules`. So when your shared modules requires, let's say `react`, Webpack will resolve it to the version in your Styleguide's `node_modules`, and not your Consumer's `node_modules`. Hence the duplicated `react` in your final bundles.
+
+You can tell Webpack how to resolve the `react` of your Styleguide to use the version in your Next.js app like that:
+
+
+```diff
+const withTM = require('next-transpile-modules')(['styleguide']);
+
+module.exports = withTM({
+  webpack: (config) => {
++   config.resolve.alias['react'] = path.resolve(__dirname, '.', 'node_modules', 'react');
+    
+    return config
+  },
+});
+```
+
+It is not a great solution, but it works. Any help to find a more future-proof solution is welcome.
