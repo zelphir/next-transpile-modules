@@ -8,6 +8,11 @@ const generateExcludes = withTmRewire.__get__('generateExcludes');
 const regexEqual = withTmRewire.__get__('regexEqual');
 
 const modules = ['shared', 'and-another', '@scoped/something', 'core'];
+const absoluteModules = [
+  'C:\\workspace\\project\\packages\\core',
+  'C:\\workspace\\project\\packages\\ui',
+  'C:\\workspace\\project\\packages\\feature'
+];
 
 describe('generateIncludes', () => {
   const includes = generateIncludes(modules);
@@ -52,10 +57,22 @@ describe('generateIncludes', () => {
   test('should NOT conflict with similar package names', () => {
     expect(anymatch(includes, 'node_modules/core-js/test.js')).toBe(false);
   });
+
+  test('should allow absolute paths', () => {
+    const absoluteIncludes = generateIncludes(absoluteModules);
+
+    expect(anymatch(absoluteIncludes, 'C:\\workspace\\project\\index.js')).toBe(false);
+    expect(anymatch(absoluteIncludes, 'C:\\workspace\\project\\packages\\core\\sub\\index.js')).toBe(true);
+    expect(anymatch(absoluteIncludes, 'C:\\workspace\\project\\packages\\ui\\index.js')).toBe(true);
+    expect(
+      anymatch(absoluteIncludes, 'C:\\workspace\\project\\packages\\feature\\node_modules\\external\\index.js')
+    ).toBe(false);
+  });
 });
 
 describe('generateExcludes', () => {
   const excludes = generateExcludes(modules);
+  const absoluteExcludes = generateExcludes(absoluteModules);
 
   test('should NOT match transpiledModules direct paths', () => {
     expect(anymatch(excludes, '/users/pierre/project/node_modules/shared/test.js')).toBe(false);
@@ -81,6 +98,21 @@ describe('generateExcludes', () => {
     expect(anymatch(excludes, '/users/pierre/project/node_modules/shared/node_modules/other/test.js')).toBe(true);
     expect(anymatch(excludes, '/users/pierre/project/node_modules/and-another/node_modules/other/test.js')).toBe(true);
     expect(anymatch(excludes, '/users/pierre/project/node_modules/@scoped/node_modules/other/something/test.js')).toBe(
+      true
+    );
+  });
+
+  test('should NOT match absolute transpiledModules direct paths', () => {
+    expect(anymatch(absoluteExcludes, 'C:\\workspace\\project\\packages\\core\\index.js')).toBe(false);
+    expect(anymatch(absoluteExcludes, 'C:\\workspace\\project\\packages\\ui\\sub\\index.js')).toBe(false);
+  });
+
+  test("should NOT match absolute module paths (package.json's main field)", () => {
+    expect(anymatch(absoluteExcludes, 'C:\\workspace\\project\\packages\\feature')).toBe(false);
+  });
+
+  test('SHOULD match node_modules packages inside a absolute transpiled module', () => {
+    expect(anymatch(absoluteExcludes, 'C:\\workspace\\project\\packages\\feature\\node_modules\\other\\test.js')).toBe(
       true
     );
   });
