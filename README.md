@@ -77,9 +77,9 @@ module.exports = withPlugins([withTM], {
 });
 ```
 
-### CSS support
+### CSS/SCSS support
 
-Since `next-transpile-modules@3` and `next@>9.2`, this plugin will also transpile CSS included in your transpiled packages:
+Since `next-transpile-modules@3` and `next@>9.2`, this plugin can also transpile CSS included in your transpiled packages. SCSS/SASS is also supported since `next-transpile-modules@3.1.0`.
 
 In your transpiled package:
 
