@@ -1,6 +1,6 @@
 # Next.js + Transpile `node_modules`
 
-[![Build Status](https://img.shields.io/circleci/project/github/martpie/next-transpile-modules.svg)](https://circleci.com/gh/martpie/next-transpile-modules)
+![Build Status](https://github.com/martpie/next-transpile-modules/workflows/tests/badge.svg)
 ![Dependencies](https://img.shields.io/david/martpie/next-transpile-modules)
 
 Transpile untranspiled modules from `node_modules` using the Next.js Babel configuration.
