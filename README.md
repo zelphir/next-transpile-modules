@@ -167,6 +167,10 @@ In your Next.js app, make sure you use a `babel.config.js` and not a `.babelrc` 
 
 If you get a transpilation error when using Yarn workspaces, make sure you are using a `babel.config.js` and not a `.babelrc`. The former is [a project-wide Babel configuration](https://babeljs.io/docs/en/config-files), when the latter works for relative paths only (and won't work as Yarn install dependencies in a parent directory).
 
+### I have trouble with transpilation and my custom `.babelrc`
+
+Make sure you are using a `babel.config.js` and not a `.babelrc`. The former is [a project-wide Babel configuration](https://babeljs.io/docs/en/config-files), when the latter works for relative paths only.
+
 ### I have trouble with Yarn and hot reloading
 
 If you add a local library (let's say with `yarn add ../some-shared-module`), Yarn will copy those files by default, instead of symlinking them. So your changes to the initial folder won't be copied to your Next.js `node_modules` directory.
