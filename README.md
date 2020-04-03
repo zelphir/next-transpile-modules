@@ -6,6 +6,8 @@
 Transpile untranspiled modules from `node_modules` using the Next.js Babel configuration.
 Makes it easy to have local libraries and keep a slick, manageable dev experience.
 
+Supports all extensions supported by Next.js: `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.css`, `.scss` and `.sass`.
+
 ## What problems does it solve?
 
 This plugin aims to solve the following challenges:
@@ -150,6 +152,7 @@ export default function MyApp({ Component, pageProps }) {
 - it is maintained, `@weco`'s seems dead
 - it supports TypeScript
 - it supports CSS modules (since Next.js 9.2)
+- it supports `.mjs`
 
 ### I have trouble making it work with Next.js 7
 
@@ -179,7 +182,7 @@ You can go back to `npm`, or use Yarn workspaces. See [an example](https://githu
 
 ### I have trouble making it work with Lerna
 
-Lerna's purpose is to publish different packages from a monorepo, **it does not help for and does not intend to help local development with local modules**.
+Lerna's purpose is to publish different packages from a monorepo, **it does not help for and does not intend to help local development with local modules** (<- this, in caps).
 
 This is not coming from me, but [from Lerna's maintainer](https://github.com/lerna/lerna/issues/1243#issuecomment-401396850).
 
@@ -218,14 +221,13 @@ The thing is in this shared package, you also have a `node_modules`. So when you
 
 You can tell Webpack how to resolve the `react` of your Styleguide to use the version in your Next.js app like that:
 
-
 ```diff
 const withTM = require('next-transpile-modules')(['styleguide']);
 
 module.exports = withTM({
   webpack: (config) => {
 +   config.resolve.alias['react'] = path.resolve(__dirname, '.', 'node_modules', 'react');
-    
+
     return config
   },
 });
