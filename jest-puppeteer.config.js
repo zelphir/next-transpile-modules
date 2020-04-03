@@ -4,13 +4,13 @@ module.exports = {
   launch: {
     headless: true,
     slowMo: false,
-    devtools: true
+    devtools: true,
   },
   server: [
     {
       command: `npm run build --prefix=${localModuleAppPath} && npm run start --prefix=${localModuleAppPath}`,
       launchTimeout: 50000,
-      port: 3000
-    }
-  ]
+      port: 3000,
+    },
+  ],
 };

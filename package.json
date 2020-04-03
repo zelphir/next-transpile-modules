@@ -8,7 +8,8 @@
   "scripts": {
     "test": "jest",
     "test:lint": "eslint .",
-    "test:formatting": "prettier --check \"**/*.js\""
+    "test:formatting": "prettier --check \"**/*.js\"",
+    "test:formatting:fix": "prettier --check \"**/*.js\" --write"
   },
   "files": [
     "index.js"
