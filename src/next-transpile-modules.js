@@ -79,7 +79,7 @@ const withTmInitializer = (transpileModules = []) => {
 
         // Add a rule to include and parse all modules (js & ts)
         config.module.rules.push({
-          test: /\.+(js|jsx|ts|tsx)$/,
+          test: /\.+(js|jsx|mjs|ts|tsx)$/,
           loader: options.defaultLoaders.babel,
           include: includes
         });
