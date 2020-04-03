@@ -38,19 +38,19 @@
     "@types/jest-environment-puppeteer": "^4.3.1",
     "anymatch": "2.0.0",
     "eslint": "6.8.0",
-    "eslint-config-prettier": "6.10.0",
+    "eslint-config-prettier": "6.10.1",
     "eslint-config-semistandard": "15.0.0",
-    "eslint-plugin-import": "2.20.1",
+    "eslint-plugin-import": "2.20.2",
     "eslint-plugin-jest": "23.8.2",
-    "eslint-plugin-node": "11.0.0",
+    "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "4.2.1",
     "eslint-plugin-standard": "4.0.1",
-    "jest": "25.1.0",
+    "jest": "25.2.7",
     "jest-environment-puppeteer": "^4.4.0",
     "jest-puppeteer": "^4.4.0",
-    "prettier": "1.19.1",
+    "prettier": "2.0.2",
     "prettier-eslint": "9.0.1",
     "puppeteer": "^2.1.1",
-    "rewire": "4.0.1"
+    "rewire": "5.0.0"
   }
 }
