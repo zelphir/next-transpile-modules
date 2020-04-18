@@ -233,4 +233,6 @@ module.exports = withTM({
 });
 ```
 
+Please note, the above [will only work](https://github.com/zeit/next.js/issues/9022#issuecomment-610255555) if `react` is properly declared as a `peerDependencies` or `devDependecy` in your referenced package.
+
 It is not a great solution, but it works. Any help to find a more future-proof solution is welcome.
