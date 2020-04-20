@@ -209,7 +209,7 @@ module.exports = withTM({
 });
 ```
 
-### I have trouble with duplicated dependencies
+### I have trouble with duplicated dependencies or the `Invalid hook call` error in `react`
 
 It can happen that when using `next-transpile-modules` with a local package and `npm`, you end up with duplicated dependencies in your final Next.js build. It is important to understand _why_ it happens.
 
@@ -232,5 +232,7 @@ module.exports = withTM({
   },
 });
 ```
+
+Please note, the above [will only work](https://github.com/zeit/next.js/issues/9022#issuecomment-610255555) if `react` is properly declared as `peerDependencies` or `devDependencies` in your referenced package.
 
 It is not a great solution, but it works. Any help to find a more future-proof solution is welcome.
