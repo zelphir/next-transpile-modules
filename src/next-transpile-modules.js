@@ -99,13 +99,13 @@ const withTmInitializer = (transpileModules = []) => {
           );
 
           if (nextCssLoader) {
-            nextCssLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
-            nextCssLoader.issuer.exclude = excludes;
+            nextCssLoader.issuer.and = nextCssLoader.issuer.and.concat(includes);
+            nextCssLoader.issuer.not = excludes;
           }
 
           if (nextSassLoader) {
-            nextSassLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
-            nextSassLoader.issuer.exclude = excludes;
+            nextSassLoader.issuer.and = nextSassLoader.issuer.and.concat(includes);
+            nextSassLoader.issuer.not = excludes;
           }
 
           // Hack our way to disable errors on node_modules CSS modules
@@ -115,8 +115,7 @@ const withTmInitializer = (transpileModules = []) => {
               rule.use.loader === 'error-loader' &&
               rule.use.options &&
               rule.use.options.reason ===
-                'CSS Modules \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-modules-npm'
+                'CSS Modules cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-modules-npm'
           );
 
           if (nextErrorCssModuleLoader) {
@@ -129,8 +128,7 @@ const withTmInitializer = (transpileModules = []) => {
               rule.use.loader === 'error-loader' &&
               rule.use.options &&
               rule.use.options.reason ===
-                'Global CSS \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-npm'
+                'Global CSS cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-npm'
           );
 
           if (nextErrorCssGlobalLoader) {
