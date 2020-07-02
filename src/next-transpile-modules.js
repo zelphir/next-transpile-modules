@@ -39,6 +39,12 @@ const generateExcludes = (modules) => {
 const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
 
 /**
+ * Checks if the given issuer uses the old attributes 'include' and 'exclude'
+ * or the new ones 'and' and 'not'.
+ */
+const isModernIssuer = (issuer) => !!issuer.and || !!issuer.not;
+
+/**
  * Actual Next.js plugin
  */
 const withTmInitializer = (transpileModules = []) => {
@@ -99,13 +105,31 @@ const withTmInitializer = (transpileModules = []) => {
           );
 
           if (nextCssLoader) {
-            nextCssLoader.issuer.and = nextCssLoader.issuer.and.concat(includes);
-            nextCssLoader.issuer.not = excludes;
+            if (isModernIssuer(nextCssLoader.issuer)) {
+              nextCssLoader.issuer.and = nextCssLoader.issuer.and
+                ? nextCssLoader.issuer.and.concat(includes)
+                : includes;
+              nextCssLoader.issuer.not = excludes;
+            } else {
+              nextCssLoader.issuer.include = nextCssLoader.issuer.include
+                ? nextCssLoader.issuer.include.concat(includes)
+                : includes;
+              nextCssLoader.issuer.exclude = excludes;
+            }
           }
 
           if (nextSassLoader) {
-            nextSassLoader.issuer.and = nextSassLoader.issuer.and.concat(includes);
-            nextSassLoader.issuer.not = excludes;
+            if (isModernIssuer(nextSassLoader.issuer)) {
+              nextSassLoader.issuer.and = nextSassLoader.issuer.and
+                ? nextSassLoader.issuer.and.concat(includes)
+                : includes;
+              nextSassLoader.issuer.not = excludes;
+            } else {
+              nextSassLoader.issuer.include = nextSassLoader.issuer.include
+                ? nextSassLoader.issuer.include.concat(includes)
+                : includes;
+              nextSassLoader.issuer.exclude = excludes;
+            }
           }
 
           // Hack our way to disable errors on node_modules CSS modules
