@@ -1,6 +1,7 @@
 const path = require('path');
 const util = require('util');
-const isWebpack5 = parseInt(require('webpack').version, 10) === 5;
+const webpack = require('webpack');
+const isWebpack5 = parseInt(webpack.version) === 5;
 
 const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
 
