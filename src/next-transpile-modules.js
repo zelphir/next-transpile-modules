@@ -107,7 +107,6 @@ const withTmInitializer = (transpileModules = []) => {
           if (nextCssLoader) {
             if (isModernIssuer(nextCssLoader.issuer)) {
               nextCssLoader.issuer.or = nextCssLoader.issuer.or ? nextCssLoader.issuer.or.concat(includes) : includes;
-              // delete nextCssLoader.issuer.and;
               nextCssLoader.issuer.not = excludes;
             } else {
               nextCssLoader.issuer.include = nextCssLoader.issuer.include
@@ -122,7 +121,6 @@ const withTmInitializer = (transpileModules = []) => {
               nextSassLoader.issuer.or = nextSassLoader.issuer.or
                 ? nextSassLoader.issuer.or.concat(includes)
                 : includes;
-              // delete nextSassLoader.issuer.and;
               nextSassLoader.issuer.not = excludes;
             } else {
               nextSassLoader.issuer.include = nextSassLoader.issuer.include
@@ -138,8 +136,11 @@ const withTmInitializer = (transpileModules = []) => {
               rule.use &&
               rule.use.loader === 'error-loader' &&
               rule.use.options &&
-              rule.use.options.reason ===
-                'CSS Modules cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-modules-npm'
+              (rule.use.options.reason ===
+                'CSS Modules \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
+                  'Read more: https://err.sh/next.js/css-modules-npm' ||
+                rule.use.options.reason ===
+                  'CSS Modules cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-modules-npm')
           );
 
           if (nextErrorCssModuleLoader) {
@@ -151,8 +152,11 @@ const withTmInitializer = (transpileModules = []) => {
               rule.use &&
               rule.use.loader === 'error-loader' &&
               rule.use.options &&
-              rule.use.options.reason ===
-                'Global CSS cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-npm'
+              (rule.use.options.reason ===
+                'Global CSS \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
+                  'Read more: https://err.sh/next.js/css-npm' ||
+                rule.use.options.reason ===
+                  'Global CSS cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-npm')
           );
 
           if (nextErrorCssGlobalLoader) {
