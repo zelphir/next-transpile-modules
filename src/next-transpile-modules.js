@@ -42,7 +42,7 @@ const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
  * Checks if the given issuer uses the old attributes 'include' and 'exclude'
  * or the new ones 'and' and 'not'.
  */
-const isModernIssuer = (issuer) => !!issuer.and || !!issuer.not;
+const isModernIssuer = (issuer) => !!issuer.and || !!issuer.or || !!issuer.not;
 
 /**
  * Actual Next.js plugin
@@ -106,9 +106,8 @@ const withTmInitializer = (transpileModules = []) => {
 
           if (nextCssLoader) {
             if (isModernIssuer(nextCssLoader.issuer)) {
-              nextCssLoader.issuer.and = nextCssLoader.issuer.and
-                ? nextCssLoader.issuer.and.concat(includes)
-                : includes;
+              nextCssLoader.issuer.or = nextCssLoader.issuer.or ? nextCssLoader.issuer.or.concat(includes) : includes;
+              // delete nextCssLoader.issuer.and;
               nextCssLoader.issuer.not = excludes;
             } else {
               nextCssLoader.issuer.include = nextCssLoader.issuer.include
@@ -120,9 +119,10 @@ const withTmInitializer = (transpileModules = []) => {
 
           if (nextSassLoader) {
             if (isModernIssuer(nextSassLoader.issuer)) {
-              nextSassLoader.issuer.and = nextSassLoader.issuer.and
-                ? nextSassLoader.issuer.and.concat(includes)
+              nextSassLoader.issuer.or = nextSassLoader.issuer.or
+                ? nextSassLoader.issuer.or.concat(includes)
                 : includes;
+              // delete nextSassLoader.issuer.and;
               nextSassLoader.issuer.not = excludes;
             } else {
               nextSassLoader.issuer.include = nextSassLoader.issuer.include
