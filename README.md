@@ -101,7 +101,7 @@ export default Button;
 ```
 
 ```css
-/* shared-ui/components/Button.module.js */
+/* shared-ui/components/Button.module.css */
 .error {
   color: white;
   background-color: red;
