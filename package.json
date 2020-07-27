@@ -52,6 +52,7 @@
     "prettier": "1.19.1",
     "prettier-eslint": "9.0.1",
     "puppeteer": "^2.1.1",
-    "rewire": "4.0.1"
+    "rewire": "4.0.1",
+    "webpack": "^4.44.0"
   }
 }

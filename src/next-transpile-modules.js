@@ -1,5 +1,6 @@
 const path = require('path');
-const util = require('util');
+const webpack = require('webpack');
+const isWebpack5 = parseInt(webpack.version) === 5;
 
 const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
 
@@ -37,6 +38,12 @@ const generateExcludes = (modules) => {
  * paths of the modules. So we need to check for \\ and /
  */
 const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
+
+/**
+ * Checks if the given issuer uses the old attributes 'include' and 'exclude'
+ * or the new ones 'and' and 'not'.
+ */
+const isModernIssuer = (issuer) => !!issuer.and || !!issuer.or || !!issuer.not;
 
 /**
  * Actual Next.js plugin
@@ -78,11 +85,19 @@ const withTmInitializer = (transpileModules = []) => {
         }
 
         // Add a rule to include and parse all modules (js & ts)
-        config.module.rules.push({
-          test: /\.+(js|jsx|mjs|ts|tsx)$/,
-          loader: options.defaultLoaders.babel,
-          include: includes
-        });
+        if (isWebpack5) {
+          config.module.rules.push({
+            test: /\.+(js|jsx|mjs|ts|tsx)$/,
+            use: options.defaultLoaders.babel,
+            include: includes
+          });
+        } else {
+          config.module.rules.push({
+            test: /\.+(js|jsx|mjs|ts|tsx)$/,
+            loader: options.defaultLoaders.babel,
+            include: includes
+          });
+        }
 
         // Support CSS modules + global in node_modules
         // TODO ask Next.js maintainer to expose the css-loader via defaultLoaders
@@ -99,13 +114,29 @@ const withTmInitializer = (transpileModules = []) => {
           );
 
           if (nextCssLoader) {
-            nextCssLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
-            nextCssLoader.issuer.exclude = excludes;
+            if (isModernIssuer(nextCssLoader.issuer)) {
+              nextCssLoader.issuer.or = nextCssLoader.issuer.or ? nextCssLoader.issuer.or.concat(includes) : includes;
+              nextCssLoader.issuer.not = excludes;
+            } else {
+              nextCssLoader.issuer.include = nextCssLoader.issuer.include
+                ? nextCssLoader.issuer.include.concat(includes)
+                : includes;
+              nextCssLoader.issuer.exclude = excludes;
+            }
           }
 
           if (nextSassLoader) {
-            nextSassLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
-            nextSassLoader.issuer.exclude = excludes;
+            if (isModernIssuer(nextSassLoader.issuer)) {
+              nextSassLoader.issuer.or = nextSassLoader.issuer.or
+                ? nextSassLoader.issuer.or.concat(includes)
+                : includes;
+              nextSassLoader.issuer.not = excludes;
+            } else {
+              nextSassLoader.issuer.include = nextSassLoader.issuer.include
+                ? nextSassLoader.issuer.include.concat(includes)
+                : includes;
+              nextSassLoader.issuer.exclude = excludes;
+            }
           }
 
           // Hack our way to disable errors on node_modules CSS modules
@@ -114,9 +145,11 @@ const withTmInitializer = (transpileModules = []) => {
               rule.use &&
               rule.use.loader === 'error-loader' &&
               rule.use.options &&
-              rule.use.options.reason ===
+              (rule.use.options.reason ===
                 'CSS Modules \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-modules-npm'
+                  'Read more: https://err.sh/next.js/css-modules-npm' ||
+                rule.use.options.reason ===
+                  'CSS Modules cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-modules-npm')
           );
 
           if (nextErrorCssModuleLoader) {
@@ -128,9 +161,11 @@ const withTmInitializer = (transpileModules = []) => {
               rule.use &&
               rule.use.loader === 'error-loader' &&
               rule.use.options &&
-              rule.use.options.reason ===
+              (rule.use.options.reason ===
                 'Global CSS \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-npm'
+                  'Read more: https://err.sh/next.js/css-npm' ||
+                rule.use.options.reason ===
+                  'Global CSS cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-npm')
           );
 
           if (nextErrorCssGlobalLoader) {
@@ -152,9 +187,12 @@ const withTmInitializer = (transpileModules = []) => {
         // Replace /node_modules/ by the new exclude RegExp (including the modules
         // that are going to be transpiled)
         // https://github.com/zeit/next.js/blob/815f2e91386a0cd046c63cbec06e4666cff85971/packages/next/server/hot-reloader.js#L335
-        const ignored = config.watchOptions.ignored
-          .filter((regexp) => !regexEqual(regexp, /[\\/]node_modules[\\/]/))
-          .concat(excludes);
+
+        const ignored = isWebpack5
+          ? config.watchOptions.ignored.concat(transpileModules)
+          : config.watchOptions.ignored
+              .filter((regexp) => !regexEqual(regexp, /[\\/]node_modules[\\/]/))
+              .concat(excludes);
 
         config.watchOptions.ignored = ignored;
 
