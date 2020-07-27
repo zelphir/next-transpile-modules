@@ -8,11 +8,11 @@
     "build": "next build",
     "start": "next start"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Pierre de la Martinière <pierre.de.la.martiniere@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "lodash-es": "^4.17.15",
-    "next": "9.4.5-canary.30",
+    "next": "9.4.5-canary.45",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "sass": "^1.26.2",
