@@ -1,5 +1,7 @@
 const path = require('path');
 const util = require('util');
+const webpack = require('webpack');
+const isWebpack5 = parseInt(webpack.version) === 5;
 
 const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
 
@@ -84,11 +86,19 @@ const withTmInitializer = (transpileModules = []) => {
         }
 
         // Add a rule to include and parse all modules (js & ts)
-        config.module.rules.push({
-          test: /\.+(js|jsx|mjs|ts|tsx)$/,
-          loader: options.defaultLoaders.babel,
-          include: includes
-        });
+        if (isWebpack5) {
+          config.module.rules.push({
+            test: /\.+(js|jsx|mjs|ts|tsx)$/,
+            use: options.defaultLoaders.babel,
+            include: includes
+          });
+        } else {
+          config.module.rules.push({
+            test: /\.+(js|jsx|mjs|ts|tsx)$/,
+            loader: options.defaultLoaders.babel,
+            include: includes
+          });
+        }
 
         // Support CSS modules + global in node_modules
         // TODO ask Next.js maintainer to expose the css-loader via defaultLoaders
@@ -178,7 +188,8 @@ const withTmInitializer = (transpileModules = []) => {
         // Replace /node_modules/ by the new exclude RegExp (including the modules
         // that are going to be transpiled)
         // https://github.com/zeit/next.js/blob/815f2e91386a0cd046c63cbec06e4666cff85971/packages/next/server/hot-reloader.js#L335
-        const ignored = config.watchOptions.ignored
+
+        const ignored = isWebpack5 ? config.watchOptions.ignored.concat(transpileModules) : config.watchOptions.ignored
           .filter((regexp) => !regexEqual(regexp, /[\\/]node_modules[\\/]/))
           .concat(excludes);
 
