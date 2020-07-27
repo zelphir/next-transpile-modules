@@ -39,6 +39,12 @@ const generateExcludes = (modules) => {
 const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
 
 /**
+ * Checks if the given issuer uses the old attributes 'include' and 'exclude'
+ * or the new ones 'and' and 'not'.
+ */
+const isModernIssuer = (issuer) => !!issuer.and || !!issuer.or || !!issuer.not;
+
+/**
  * Actual Next.js plugin
  */
 const withTmInitializer = (transpileModules = []) => {
@@ -99,13 +105,29 @@ const withTmInitializer = (transpileModules = []) => {
           );
 
           if (nextCssLoader) {
-            nextCssLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
-            nextCssLoader.issuer.exclude = excludes;
+            if (isModernIssuer(nextCssLoader.issuer)) {
+              nextCssLoader.issuer.or = nextCssLoader.issuer.or ? nextCssLoader.issuer.or.concat(includes) : includes;
+              nextCssLoader.issuer.not = excludes;
+            } else {
+              nextCssLoader.issuer.include = nextCssLoader.issuer.include
+                ? nextCssLoader.issuer.include.concat(includes)
+                : includes;
+              nextCssLoader.issuer.exclude = excludes;
+            }
           }
 
           if (nextSassLoader) {
-            nextSassLoader.issuer.include = nextCssLoader.issuer.include.concat(includes);
-            nextSassLoader.issuer.exclude = excludes;
+            if (isModernIssuer(nextSassLoader.issuer)) {
+              nextSassLoader.issuer.or = nextSassLoader.issuer.or
+                ? nextSassLoader.issuer.or.concat(includes)
+                : includes;
+              nextSassLoader.issuer.not = excludes;
+            } else {
+              nextSassLoader.issuer.include = nextSassLoader.issuer.include
+                ? nextSassLoader.issuer.include.concat(includes)
+                : includes;
+              nextSassLoader.issuer.exclude = excludes;
+            }
           }
 
           // Hack our way to disable errors on node_modules CSS modules
@@ -114,9 +136,11 @@ const withTmInitializer = (transpileModules = []) => {
               rule.use &&
               rule.use.loader === 'error-loader' &&
               rule.use.options &&
-              rule.use.options.reason ===
+              (rule.use.options.reason ===
                 'CSS Modules \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-modules-npm'
+                  'Read more: https://err.sh/next.js/css-modules-npm' ||
+                rule.use.options.reason ===
+                  'CSS Modules cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-modules-npm')
           );
 
           if (nextErrorCssModuleLoader) {
@@ -128,9 +152,11 @@ const withTmInitializer = (transpileModules = []) => {
               rule.use &&
               rule.use.loader === 'error-loader' &&
               rule.use.options &&
-              rule.use.options.reason ===
+              (rule.use.options.reason ===
                 'Global CSS \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-npm'
+                  'Read more: https://err.sh/next.js/css-npm' ||
+                rule.use.options.reason ===
+                  'Global CSS cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-npm')
           );
 
           if (nextErrorCssGlobalLoader) {
