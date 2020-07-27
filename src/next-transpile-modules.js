@@ -1,5 +1,4 @@
 const path = require('path');
-const util = require('util');
 const webpack = require('webpack');
 const isWebpack5 = parseInt(webpack.version) === 5;
 
@@ -22,7 +21,7 @@ const regexEqual = (x, y) => {
 const generateIncludes = (modules) => {
   return [
     new RegExp(`(${modules.map(safePath).join('|')})$`),
-    new RegExp(`(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`)
+    new RegExp(`(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`),
   ];
 };
 
@@ -30,7 +29,7 @@ const generateExcludes = (modules) => {
   return [
     new RegExp(
       `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})(${PATH_DELIMITER}|$)(?!.*node_modules))`
-    )
+    ),
   ];
 };
 
@@ -90,13 +89,13 @@ const withTmInitializer = (transpileModules = []) => {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             use: options.defaultLoaders.babel,
-            include: includes
+            include: includes,
           });
         } else {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             loader: options.defaultLoaders.babel,
-            include: includes
+            include: includes,
           });
         }
 
@@ -189,9 +188,11 @@ const withTmInitializer = (transpileModules = []) => {
         // that are going to be transpiled)
         // https://github.com/zeit/next.js/blob/815f2e91386a0cd046c63cbec06e4666cff85971/packages/next/server/hot-reloader.js#L335
 
-        const ignored = isWebpack5 ? config.watchOptions.ignored.concat(transpileModules) : config.watchOptions.ignored
-          .filter((regexp) => !regexEqual(regexp, /[\\/]node_modules[\\/]/))
-          .concat(excludes);
+        const ignored = isWebpack5
+          ? config.watchOptions.ignored.concat(transpileModules)
+          : config.watchOptions.ignored
+              .filter((regexp) => !regexEqual(regexp, /[\\/]node_modules[\\/]/))
+              .concat(excludes);
 
         config.watchOptions.ignored = ignored;
 
@@ -200,7 +201,7 @@ const withTmInitializer = (transpileModules = []) => {
         }
 
         return config;
-      }
+      },
     });
   };
 

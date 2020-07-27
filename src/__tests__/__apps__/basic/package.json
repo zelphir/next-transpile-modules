@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "next start"
+    "dev": "NODE_PRESERVE_SYMLINKS=1 next",
+    "build": "NODE_PRESERVE_SYMLINKS=1 next build",
+    "start": "NODE_PRESERVE_SYMLINKS=1 next start"
   },
   "author": "Pierre de la Martinière <pierre.de.la.martiniere@gmail.com>",
   "license": "MIT",
