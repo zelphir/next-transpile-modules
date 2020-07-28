@@ -11,17 +11,17 @@ module.exports = {
   server: [
     {
       command: `npm run build --prefix=${basicAppPath} && npm run start --prefix=${basicAppPath}`,
-      launchTimeout: 50000,
+      launchTimeout: 300000,
       port: 3000
     },
     {
       command: `yarn --cwd ${yarnWorkspacesAppPath} run build  && yarn --cwd ${yarnWorkspacesAppPath} run start -- --port 3001`,
-      launchTimeout: 50000,
+      launchTimeout: 300000,
       port: 3001
     },
     {
       command: `yarn --cwd ${webpack5AppPath} run build  && yarn --cwd ${webpack5AppPath} run start -- --port 3002`,
-      launchTimeout: 200000, // Apparently, building is heck slow on Webpack 5 :shrug:
+      launchTimeout: 300000, // Apparently, building is heck slow on Webpack 5 :shrug:
       port: 3002
     }
   ]
