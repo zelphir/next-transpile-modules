@@ -4,6 +4,11 @@ const isWebpack5 = parseInt(webpack.version) === 5;
 
 const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
 
+// Use me when needed
+// const inspect = (object) => {
+//   console.log(util.inspect(object, { showHidden: false, depth: null }));
+// };
+
 /**
  * Stolen from https://stackoverflow.com/questions/10776600/testing-for-equality-of-regular-expressions
  */
@@ -38,12 +43,6 @@ const generateExcludes = (modules) => {
  * paths of the modules. So we need to check for \\ and /
  */
 const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
-
-/**
- * Checks if the given issuer uses the old attributes 'include' and 'exclude'
- * or the new ones 'and' and 'not'.
- */
-const isModernIssuer = (issuer) => !!issuer.and || !!issuer.or || !!issuer.not;
 
 /**
  * Actual Next.js plugin
@@ -114,29 +113,17 @@ const withTmInitializer = (transpileModules = []) => {
           );
 
           if (nextCssLoader) {
-            if (isModernIssuer(nextCssLoader.issuer)) {
-              nextCssLoader.issuer.or = nextCssLoader.issuer.or ? nextCssLoader.issuer.or.concat(includes) : includes;
-              nextCssLoader.issuer.not = excludes;
-            } else {
-              nextCssLoader.issuer.include = nextCssLoader.issuer.include
-                ? nextCssLoader.issuer.include.concat(includes)
-                : includes;
-              nextCssLoader.issuer.exclude = excludes;
-            }
+            nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(includes) : includes;
+            nextCssLoader.issuer.not = excludes;
+            delete nextCssLoader.issuer.and;
           }
 
           if (nextSassLoader) {
-            if (isModernIssuer(nextSassLoader.issuer)) {
-              nextSassLoader.issuer.or = nextSassLoader.issuer.or
-                ? nextSassLoader.issuer.or.concat(includes)
-                : includes;
-              nextSassLoader.issuer.not = excludes;
-            } else {
-              nextSassLoader.issuer.include = nextSassLoader.issuer.include
-                ? nextSassLoader.issuer.include.concat(includes)
-                : includes;
-              nextSassLoader.issuer.exclude = excludes;
-            }
+            nextSassLoader.issuer.or = nextSassLoader.issuer.and
+              ? nextSassLoader.issuer.and.concat(includes)
+              : includes;
+            nextSassLoader.issuer.not = excludes;
+            delete nextCssLoader.issuer.and;
           }
 
           // Hack our way to disable errors on node_modules CSS modules
