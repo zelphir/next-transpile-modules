@@ -1,5 +1,9 @@
 const BASE_URL = 'http://localhost:3002';
 
+beforeEach(async () => {
+  jest.setTimeout(150000);
+});
+
 describe('homepage access', () => {
   test('homepage should be correctly displayed', async () => {
     const page = await browser.newPage();
