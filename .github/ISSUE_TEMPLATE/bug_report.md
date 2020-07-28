@@ -4,7 +4,6 @@ about: Report a bug
 title: ''
 labels: ''
 assignees: ''
-
 ---
 
 - [ ] I HAVE READ [THE FAQ](https://github.com/martpie/next-transpile-modules#faq) AND MY PROBLEM WAS NOT DESCRIBED THERE
@@ -28,6 +27,7 @@ A clear and concise description of what you expected to happen.
 - Node.js version:
 - `npm`/`yarn` version:
 - Operating System:
+- Webpack 4 or 5:
 
 **Additional context**
 Add any other context about the problem here.
