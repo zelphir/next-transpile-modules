@@ -21,7 +21,7 @@ module.exports = {
     },
     {
       command: `yarn --cwd ${webpack5AppPath} run build  && yarn --cwd ${webpack5AppPath} run start -- --port 3002`,
-      launchTimeout: 50000,
+      launchTimeout: 200000, // Apparently, building is heck slow on Webpack 5 :shrug:
       port: 3002
     }
   ]
