@@ -115,7 +115,6 @@ const withTmInitializer = (transpileModules = []) => {
           if (nextCssLoader) {
             nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(includes) : includes;
             nextCssLoader.issuer.not = excludes;
-            delete nextCssLoader.issuer.and;
           }
 
           if (nextSassLoader) {
@@ -123,7 +122,6 @@ const withTmInitializer = (transpileModules = []) => {
               ? nextSassLoader.issuer.and.concat(includes)
               : includes;
             nextSassLoader.issuer.not = excludes;
-            delete nextCssLoader.issuer.and;
           }
 
           // Hack our way to disable errors on node_modules CSS modules
