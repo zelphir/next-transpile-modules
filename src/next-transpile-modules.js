@@ -178,7 +178,7 @@ const withTmInitializer = (transpileModules = []) => {
         const ignored = isWebpack5
           ? config.watchOptions.ignored.concat(transpileModules)
           : config.watchOptions.ignored
-              .filter((regexp) => !regexEqual(regexp, /[\\/]node_modules[\\/]/))
+              .filter((pattern) => !regexEqual(pattern, /[\\/]node_modules[\\/]/) && pattern !== '**/node_modules/**')
               .concat(excludes);
 
         config.watchOptions.ignored = ignored;
