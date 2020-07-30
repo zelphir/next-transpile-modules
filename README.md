@@ -169,7 +169,7 @@ So basically: use your lock files right, and understand what problems they are s
 
 more: 
 
-- check the compatibility table of this plugin
+- check the [compatibility table](#compatibility-table) of this plugin
 - read more about semver and version resolutions: https://docs.npmjs.com/misc/semver
 
 ### I have trouble making it work with Next.js 7
