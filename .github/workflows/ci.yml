@@ -24,25 +24,19 @@ jobs:
         run: bash .github/workflows/setup_puppeteer.sh
         if: startsWith(matrix.os,'ubuntu')
 
-      - name: Install tests apps dependencies (basic)
-        run: npm ci --prefix=src/__tests__/__apps__/basic
-
-      - name: Build test app (basic)
-        run: npm run build --prefix=src/__tests__/__apps__/basic
+      - name: Install tests apps dependencies (npm-basic)
+        run: npm ci --prefix=src/__tests__/__apps__/npm-basic
 
       - name: Install tests apps dependencies (webpack 5)
         run: yarn --frozen-lockfile --cwd src/__tests__/__apps__/webpack-5
 
-      - name: Build test app (yarn workspaces)
-        run: yarn --cwd src/__tests__/__apps__/webpack-5 run build
-
       - name: Install tests apps dependencies (yarn workspaces)
         run: yarn --frozen-lockfile --cwd src/__tests__/__apps__/yarn-workspaces
 
-      - name: Build test app (yarn workspaces)
-        run: yarn --cwd src/__tests__/__apps__/yarn-workspaces/app run build
+      - name: Build test apps
+        run: npm run test:prepare
 
-      - name: 'Test: unit & end-to-end tests'
+      - name: 'Test: unit & integration tests'
         run: npm test
 
       - name: 'Test: linting'

@@ -1,4 +1,4 @@
-const basicAppPath = 'src/__tests__/__apps__/basic';
+const npmBasicAppPath = 'src/__tests__/__apps__/npm-basic';
 const yarnWorkspacesAppPath = 'src/__tests__/__apps__/yarn-workspaces/app';
 const webpack5AppPath = 'src/__tests__/__apps__/webpack-5';
 
@@ -10,19 +10,19 @@ module.exports = {
   },
   server: [
     {
-      command: `npm run start --prefix=${basicAppPath}`,
+      command: `npm run start --prefix=${npmBasicAppPath} -- --port 3500`,
       launchTimeout: 20000,
-      port: 3000
+      port: 3500
     },
     {
-      command: `yarn --cwd ${yarnWorkspacesAppPath} run start -- --port 3001`,
+      command: `yarn --cwd ${yarnWorkspacesAppPath} run start -- --port 3501`,
       launchTimeout: 20000,
-      port: 3001
+      port: 3501
     },
     {
-      command: `yarn --cwd ${webpack5AppPath} run start -- --port 3002`,
+      command: `yarn --cwd ${webpack5AppPath} run start -- --port 3502`,
       launchTimeout: 20000,
-      port: 3002
+      port: 3502
     }
   ]
 };
