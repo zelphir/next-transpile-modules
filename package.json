@@ -9,7 +9,11 @@
     "test": "jest",
     "test:lint": "eslint .",
     "test:formatting": "prettier --check \"**/*.js\"",
-    "test:formatting:fix": "prettier --check \"**/*.js\" --write"
+    "test:formatting:fix": "prettier --check \"**/*.js\" --write",
+    "test:prepare:basic": "npm run build --prefix=src/__tests__/__apps__/basic",
+    "test:prepare:yarn-worskpaces": "yarn --cwd src/__tests__/__apps__/yarn-workspaces/app run build",
+    "test:prepare:webpack-5": "yarn --cwd src/__tests__/__apps__/webpack-5 run build",
+    "test:prepare": "npm run test:prepare:basic && npm run test:prepare:yarn-worskpaces && npm run test:prepare:webpack-5"
   },
   "files": [
     "index.js"

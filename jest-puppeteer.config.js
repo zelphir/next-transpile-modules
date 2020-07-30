@@ -10,19 +10,19 @@ module.exports = {
   },
   server: [
     {
-      command: `npm run start --prefix=${basicAppPath}`,
+      command: `npm run start --prefix=${basicAppPath} -- --port 3500`,
       launchTimeout: 20000,
-      port: 3000
+      port: 3500
     },
     {
-      command: `yarn --cwd ${yarnWorkspacesAppPath} run start -- --port 3001`,
+      command: `yarn --cwd ${yarnWorkspacesAppPath} run start -- --port 3501`,
       launchTimeout: 20000,
-      port: 3001
+      port: 3501
     },
     {
-      command: `yarn --cwd ${webpack5AppPath} run start -- --port 3002`,
+      command: `yarn --cwd ${webpack5AppPath} run start -- --port 3502`,
       launchTimeout: 20000,
-      port: 3002
+      port: 3502
     }
   ]
 };
