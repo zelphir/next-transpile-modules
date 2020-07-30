@@ -24,8 +24,8 @@ jobs:
         run: bash .github/workflows/setup_puppeteer.sh
         if: startsWith(matrix.os,'ubuntu')
 
-      - name: Install tests apps dependencies (basic)
-        run: npm ci --prefix=src/__tests__/__apps__/basic
+      - name: Install tests apps dependencies (npm-basic)
+        run: npm ci --prefix=src/__tests__/__apps__/npm-basic
 
       - name: Install tests apps dependencies (webpack 5)
         run: yarn --frozen-lockfile --cwd src/__tests__/__apps__/webpack-5
