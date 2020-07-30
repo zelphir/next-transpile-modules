@@ -36,7 +36,7 @@ jobs:
       - name: Build test apps
         run: npm run test:prepare
 
-      - name: 'Test: unit & end-to-end tests'
+      - name: 'Test: unit & integration tests'
         run: npm test
 
       - name: 'Test: linting'
