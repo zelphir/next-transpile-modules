@@ -159,9 +159,9 @@ export default function MyApp({ Component, pageProps }) {
 
 ### A new version of Next.js is available/I just setup my project, and my build is breaking because of this plugin
 
-It is important to understand that this plugin is a big hack of the Next.js Webpack configuration. When the Next.js team pushes an update to their build configuration, the changes `next-transpile-modules` bring may be outdated, and the plugin needs to be updated.
+It is important to understand that this plugin is a big hack of the Next.js Webpack configuration. When the Next.js team pushes an update to their build configuration, the changes `next-transpile-modules` bring may be outdated, and the plugin needs to be updated (which is a breaking change for this plugin, as the updated plugin is usually not retro-compatible with the previous versions of Next.js).
 
-Now, this build problem can happen when you install your dependencies with `npm install`/`yarn install` (in your CI pipeline for example). Those commands **may re-resolve your `next` dependency of your `package.json` to a newer one**, hence breaking your build (because there were Webpack breaking changes in Next.js `9.5.0` (breaking changes for `next-transpile-modules`, but not for the average user).
+Now, this build problem can happen when you install your dependencies with `npm install`/`yarn install` (in your CI pipeline for example). Those commands **may re-resolve your `next` dependency of your `package.json` to a newer one**, and this newer one may have critical Webpack changes, hence breaking your build.
 
 The way to fix it is easy, and it is what you should always do: **install your dependencies with `npm ci` ("clean install") or `yarn --frozen-lockfile`**. This will force `npm` or `yarn` to use the version of Next.js declared in your lock file, instead of downloading the latest one compatible with the version accepted by your `package.json`.
 
