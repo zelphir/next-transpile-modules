@@ -157,6 +157,21 @@ export default function MyApp({ Component, pageProps }) {
 - it supports CSS modules (since Next.js 9.2)
 - it supports `.mjs`
 
+### A new version of Next.js is available/I just setup my project, and my build is breaking because of this plugin
+
+It is important to understand that this plugin is a big hack of the Next.js Webpack configuration. When the Next.js team pushes an update to their build configuration, the changes `next-transpile-modules` bring may be outdated, and the plugin needs to be updated.
+
+Now, this build problem can happen when you install your dependencies with `npm install`/`yarn install` (in your CI pipeline for example). Those commands **may re-resolve your `next` dependency of your `package.json` to a newer one**, hence breaking your build (because there were Webpack breaking changes in Next.js `9.5.0` (breaking changes for `next-transpile-modules`, but not for the average user).
+
+The way to fix it is easy, and it is what you should always do: **install your dependencies with `npm ci` ("clean install") or `yarn --frozen-lockfile`**. This will force `npm` or `yarn` to use the version of Next.js declared in your lock file, instead of downloading the latest one compatible with the version accepted by your `package.json`.
+
+So basically: use your lock files right, and understand what problems they are solving ;)
+
+more: 
+
+- check the compatibility table of this plugin
+- read more about semver and version resolutions: https://docs.npmjs.com/misc/semver
+
 ### I have trouble making it work with Next.js 7
 
 Next.js 7 introduced Webpack 4 and Babel 7, [which changed a couple of things](https://github.com/zeit/next.js/issues/5393#issuecomment-458517433), especially for TypeScript and Flow plugins.
@@ -193,7 +208,7 @@ So you are probably [using it wrong](https://github.com/martpie/next-transpile-m
 
 ### But... I really need to make it work with Lerna!
 
-You may need to tell your Webpack configuration how to properly resolve your scoped packages, as they won't be installed in your Next.js directory, but the root of your Lerna setup.
+Again, most probably a bad idea. You may need to tell your Webpack configuration how to properly resolve your scoped packages, as they won't be installed in your Next.js directory, but the root of your Lerna setup.
 
 ```js
 const withTM = require('next-transpile-modules')(['@your-project/shared', '@your-project/styleguide']);
