@@ -28,7 +28,7 @@ What this plugin **does not aim** to solve:
 | Next.js 8 / 9   | 2.x            |
 | Next.js 6 / 7   | 1.x            |
 
-Latest version tested: **9.5.0**.
+Latest version tested: **9.5.1**.
 
 ## Installation
 
@@ -167,7 +167,7 @@ The way to fix it is easy, and it is what you should always do: **install your d
 
 So basically: use your lock files right, and understand what problems they are solving ;)
 
-more: 
+more:
 
 - check the [compatibility table](#compatibility-table) of this plugin
 - read more about semver and version resolutions: https://docs.npmjs.com/misc/semver
