@@ -5,5 +5,5 @@ type Props = {
 };
 
 export const Subtitle: React.FC<Props> = (props) => {
-  <h2 style={{ textDecoration: props.underlined ? 'underline' : 'none' }}>{props.children}</h2>;
+  return <h2 style={{ textDecoration: props.underlined ? 'underline' : 'none' }}>{props.children}</h2>;
 };
