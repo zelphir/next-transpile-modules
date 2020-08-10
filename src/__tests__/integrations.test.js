@@ -40,7 +40,7 @@ describe.each([
   });
 
   describe('local-typescript-module transpilation', () => {
-    test('pages using transpiled modules should be correctly displayed', async () => {
+    test('pages using transpiled modules (helpers or React components) should be correctly displayed', async () => {
       const page = await browser.newPage();
       const response = await page.goto(`${BASE_URL}/test-local-typescript-module`);
 
@@ -50,6 +50,9 @@ describe.each([
 
       const content = await page.$eval('h1', (e) => e.textContent);
       expect(content).toBe('The answer is 43');
+
+      const content2 = await page.$eval('h2', (e) => e.textContent);
+      expect(content2).toBe('And this is a subtitle');
     });
   });
 
