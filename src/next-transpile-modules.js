@@ -53,6 +53,11 @@ const withTmInitializer = (transpileModules = []) => {
 
     const includes = generateIncludes(transpileModules);
     const excludes = generateExcludes(transpileModules);
+    const hasInclude = (ctx, req) => {
+      return includes.find((include) =>
+        req.startsWith('.') ? include.test(path.resolve(ctx, req)) : include.test(req)
+      )
+    };
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
@@ -73,13 +78,18 @@ const withTmInitializer = (transpileModules = []) => {
         if (config.externals) {
           config.externals = config.externals.map((external) => {
             if (typeof external !== 'function') return external;
-            return (ctx, req, cb) => {
-              return includes.find((include) =>
-                req.startsWith('.') ? include.test(path.resolve(ctx, req)) : include.test(req)
-              )
-                ? cb()
-                : external(ctx, req, cb);
-            };
+
+            return isWebpack5
+              ?  ({context, request}, cb) => {
+                return hasInclude(context, request)
+                  ? cb()
+                  : external({context, request}, cb);
+              }
+              : (ctx, req, cb) => {
+                return hasInclude(ctx, req)
+                  ? cb()
+                  : external(ctx, req, cb);
+              }
           });
         }
 
