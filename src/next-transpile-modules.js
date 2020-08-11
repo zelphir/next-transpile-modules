@@ -56,7 +56,7 @@ const withTmInitializer = (transpileModules = []) => {
     const hasInclude = (ctx, req) => {
       return includes.find((include) =>
         req.startsWith('.') ? include.test(path.resolve(ctx, req)) : include.test(req)
-      )
+      );
     };
 
     return Object.assign({}, nextConfig, {
@@ -80,16 +80,12 @@ const withTmInitializer = (transpileModules = []) => {
             if (typeof external !== 'function') return external;
 
             return isWebpack5
-              ?  ({context, request}, cb) => {
-                return hasInclude(context, request)
-                  ? cb()
-                  : external({context, request}, cb);
-              }
+              ? ({ context, request }, cb) => {
+                  return hasInclude(context, request) ? cb() : external({ context, request }, cb);
+                }
               : (ctx, req, cb) => {
-                return hasInclude(ctx, req)
-                  ? cb()
-                  : external(ctx, req, cb);
-              }
+                  return hasInclude(ctx, req) ? cb() : external(ctx, req, cb);
+                };
           });
         }
 
