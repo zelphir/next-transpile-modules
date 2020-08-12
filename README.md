@@ -44,7 +44,9 @@ yarn add next-transpile-modules
 
 ## Usage
 
-### Classic:
+```
+withTM(transpileModules [, options])
+```
 
 ```js
 // next.config.js
@@ -54,6 +56,13 @@ module.exports = withTM();
 ```
 
 **note:** please declare `withTM` as your last plugin (the "most nested" one).
+
+### Options
+
+| option              | description                                                                                      | default |
+| ------------------- | ------------------------------------------------------------------------------------------------ | ------- |
+| `resolveSymlinks`   | Enable symlinks resolution to their real path by Webpack (most of the time, you won't want that) | `false` |
+| `unstable_webpack5` | Enable Next.js Webpack 5 support (experimental)                                                  | `false` |
 
 ### Scoped packages
 

@@ -1,6 +1,4 @@
 const path = require('path');
-const webpack = require('webpack');
-const isWebpack5 = parseInt(webpack.version) === 5;
 
 const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
 
@@ -47,9 +45,12 @@ const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
 /**
  * Actual Next.js plugin
  */
-const withTmInitializer = (transpileModules = []) => {
+const withTmInitializer = (transpileModules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
     if (transpileModules.length === 0) return nextConfig;
+
+    const resolveSymlinks = options.resolveSymlinks || false;
+    const isWebpack5 = options.unstable_webpack5 || false;
 
     const includes = generateIncludes(transpileModules);
     const excludes = generateExcludes(transpileModules);
@@ -72,7 +73,7 @@ const withTmInitializer = (transpileModules = []) => {
         // we want to test modules from node_modules only. If it was enabled,
         // modules in node_modules installed via symlink would then not be
         // transpiled.
-        config.resolve.symlinks = false;
+        config.resolve.symlinks = resolveSymlinks;
 
         // Since Next.js 8.1.0, config.externals is undefined
         if (config.externals) {
