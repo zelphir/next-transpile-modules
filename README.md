@@ -44,11 +44,27 @@ yarn add next-transpile-modules
 
 ## Usage
 
-### Classic:
+### withTM(transpileModules [, options])
+
+- `transpileModules` String[]: modules to be transpiled
+- `options` Object (optional)
+  - `resolveSymlinks` Boolean: Enable symlinks resolution to their real path by Webpack (most of the time, you won't want that) (default to `false`)
+  - `unstable_webpack5` Boolean: Enable [Next.js Webpack 5 support](https://nextjs.org/blog/next-9-5#webpack-5-support-beta) (experimental) (default to `false`)
+
+**note:** unstable features may break in any patch or minor release without any warning, be careful!
+
+Example:
 
 ```js
 // next.config.js
 const withTM = require('next-transpile-modules')(['somemodule', 'and-another']); // pass the modules you would like to see transpiled
+
+module.exports = withTM();
+```
+
+```js
+// next.config.js
+const withTM = require('next-transpile-modules')(['somemodule', 'and-another'], { unstable_webpack5: true });
 
 module.exports = withTM();
 ```
