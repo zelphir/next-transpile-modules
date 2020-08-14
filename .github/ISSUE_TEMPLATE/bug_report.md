@@ -7,6 +7,7 @@ assignees: ''
 ---
 
 - [ ] I HAVE READ [THE FAQ](https://github.com/martpie/next-transpile-modules#faq) AND MY PROBLEM WAS NOT DESCRIBED THERE
+- [ ] I WILL GIVE 100$ TO CHARITY IF MY SOLUTION WAS ACTUALLY IN THE FAQ
 
 **Are you trying to transpile a local package or an npm package?**
 If an npm package, which one?
