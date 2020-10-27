@@ -132,39 +132,6 @@ const withTmInitializer = (transpileModules = [], options = {}) => {
             nextSassLoader.issuer.not = excludes;
             delete nextSassLoader.issuer.and;
           }
-
-          // Hack our way to disable errors on node_modules CSS modules
-          const nextErrorCssModuleLoader = nextCssLoaders.oneOf.find(
-            (rule) =>
-              rule.use &&
-              rule.use.loader === 'error-loader' &&
-              rule.use.options &&
-              (rule.use.options.reason ===
-                'CSS Modules \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-modules-npm' ||
-                rule.use.options.reason ===
-                  'CSS Modules cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-modules-npm')
-          );
-
-          if (nextErrorCssModuleLoader) {
-            nextErrorCssModuleLoader.exclude = includes;
-          }
-
-          const nextErrorCssGlobalLoader = nextCssLoaders.oneOf.find(
-            (rule) =>
-              rule.use &&
-              rule.use.loader === 'error-loader' &&
-              rule.use.options &&
-              (rule.use.options.reason ===
-                'Global CSS \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-npm' ||
-                rule.use.options.reason ===
-                  'Global CSS cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-npm')
-          );
-
-          if (nextErrorCssGlobalLoader) {
-            nextErrorCssGlobalLoader.exclude = includes;
-          }
         }
 
         // Overload the Webpack config if it was already overloaded
