@@ -11,7 +11,7 @@ const modules = ['shared', 'and-another', '@scoped/something', 'core'];
 const absoluteModules = [
   'C:\\workspace\\project\\packages\\core',
   'C:\\workspace\\project\\packages\\ui',
-  'C:\\workspace\\project\\packages\\feature'
+  'C:\\workspace\\project\\packages\\feature',
 ];
 
 describe('generateIncludes', () => {
