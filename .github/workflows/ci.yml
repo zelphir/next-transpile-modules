@@ -24,6 +24,9 @@ jobs:
         run: bash .github/workflows/setup_puppeteer.sh
         if: startsWith(matrix.os,'ubuntu')
 
+      - name: Tests setup
+        run: node src/__tests__/setup.js
+
       - name: Install tests apps dependencies (npm-basic)
         run: npm ci --prefix=src/__tests__/__apps__/npm-basic
 

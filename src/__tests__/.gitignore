@@ -4,3 +4,10 @@ __apps__/yarn-workspaces/_shared-ui
 __apps__/_shared
 __apps__/_shared-ts
 __apps__/_shared-ui
+
+__apps__/npm-basic/pages
+!__apps__/npm-basic/pages/.keep
+__apps__/webpack-5/pages
+!__apps__/webpack-5/pages/.keep
+__apps__/yarn-workspaces/app/pages
+!__apps__/yarn-workspaces/app/pages/.keep
