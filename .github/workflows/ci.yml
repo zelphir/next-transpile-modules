@@ -37,7 +37,7 @@ jobs:
         run: yarn --frozen-lockfile --cwd src/__tests__/__apps__/yarn-workspaces
 
       - name: Install tests apps dependencies (yarn workspaces)
-        run: npx pnpm i --frozen-lockfile
+        run: npx pnpm i --frozen-lockfile --prefix src/__tests__/__apps__/pnpm
 
       - name: Build test apps
         run: npm run test:prepare
