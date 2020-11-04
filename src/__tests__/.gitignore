@@ -1,0 +1,6 @@
+__apps__/yarn-workspaces/_shared
+__apps__/yarn-workspaces/_shared-ts
+__apps__/yarn-workspaces/_shared-ui
+__apps__/_shared
+__apps__/_shared-ts
+__apps__/_shared-ui
