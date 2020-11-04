@@ -8,3 +8,4 @@ fse.copySync('src/__tests__/__packages__', 'src/__tests__/__apps__/yarn-workspac
 fse.copySync('src/__tests__/__pages__', 'src/__tests__/__apps__/npm-basic/pages');
 fse.copySync('src/__tests__/__pages__', 'src/__tests__/__apps__/webpack-5/pages');
 fse.copySync('src/__tests__/__pages__', 'src/__tests__/__apps__/yarn-workspaces/app/pages');
+fse.copySync('src/__tests__/__pages__', 'src/__tests__/__apps__/pnpm/pages');

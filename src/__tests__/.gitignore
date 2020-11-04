@@ -11,3 +11,5 @@ __apps__/webpack-5/pages
 !__apps__/webpack-5/pages/.keep
 __apps__/yarn-workspaces/app/pages
 !__apps__/yarn-workspaces/app/pages/.keep
+__apps__/pnpm/pages
+!__apps__/pnpm/pages/.keep
