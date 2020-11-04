@@ -1,7 +1,22 @@
+const fse = require('fs-extra');
+
+const throwErr = (err) => {
+  throw err;
+};
+
+beforeAll(() => {
+  // Setup local packages
+  fse.copySync('./__packages__', './__apps__', throwErr);
+  fse.copySync('./__packages__', './__apps__/yarn-workspaces', throwErr);
+
+  // Setup pages folder
+  // TODO:
+});
+
 describe.each([
   ['npm', 3500], // name of the test, port
   ['yarn-worspaces', 3501],
-  ['webpack-5', 3502]
+  ['webpack-5', 3502],
 ])('%s integration', (name, port) => {
   const BASE_URL = `http://localhost:${port}`;
 
