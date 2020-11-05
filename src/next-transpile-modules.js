@@ -45,15 +45,15 @@ const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
 /**
  * Actual Next.js plugin
  */
-const withTmInitializer = (transpileModules = [], options = {}) => {
+const withTmInitializer = (modules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
-    if (transpileModules.length === 0) return nextConfig;
+    if (modules.length === 0) return nextConfig;
 
     const resolveSymlinks = options.resolveSymlinks || false;
     const isWebpack5 = options.unstable_webpack5 || false;
 
-    const includes = generateIncludes(transpileModules);
-    const excludes = generateExcludes(transpileModules);
+    const includes = generateIncludes(modules);
+    const excludes = generateExcludes(modules);
     const hasInclude = (ctx, req) => {
       return includes.find((include) =>
         req.startsWith('.') ? include.test(path.resolve(ctx, req)) : include.test(req)
@@ -150,7 +150,7 @@ const withTmInitializer = (transpileModules = [], options = {}) => {
         // https://github.com/zeit/next.js/blob/815f2e91386a0cd046c63cbec06e4666cff85971/packages/next/server/hot-reloader.js#L335
 
         const ignored = isWebpack5
-          ? config.watchOptions.ignored.concat(transpileModules)
+          ? config.watchOptions.ignored.concat(modules)
           : config.watchOptions.ignored
               .filter((pattern) => !regexEqual(pattern, /[\\/]node_modules[\\/]/) && pattern !== '**/node_modules/**')
               .concat(excludes);

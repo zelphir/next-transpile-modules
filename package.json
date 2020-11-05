@@ -1,10 +1,13 @@
 {
   "name": "next-transpile-modules",
   "version": "4.1.0",
-  "main": "src/next-transpile-modules.js",
   "license": "MIT",
   "author": "Pierre de la Martinière <pierre.de.la.martiniere@gmail.com>",
   "description": "Next.js plugin to transpile code from node_modules (supports TypeScript)",
+  "main": "src/next-transpile-modules.js",
+  "files": [
+    "src/next-transpile-modules.js"
+  ],
   "scripts": {
     "test": "jest --forceExit",
     "test:debug": "jest --detectOpenHandles --forceExit",
@@ -17,9 +20,6 @@
     "test:prepare:pnpm": "npm run build --prefix=src/__tests__/__apps__/pnpm",
     "test:prepare": "npm run test:prepare:npm-basic && npm run test:prepare:yarn-worskpaces && npm run test:prepare:webpack-5 && npm run test:prepare:pnpm"
   },
-  "files": [
-    "index.js"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/martpie/next-transpile-modules.git"
