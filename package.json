@@ -9,6 +9,7 @@
     "src/next-transpile-modules.js"
   ],
   "scripts": {
+    "pretest": "node --trace-uncaught src/__tests__/setup.js",
     "test": "jest --forceExit",
     "test:debug": "jest --detectOpenHandles --forceExit",
     "test:lint": "eslint .",

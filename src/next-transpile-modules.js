@@ -1,6 +1,5 @@
 const path = require('path');
-
-const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
+const resolve = require('resolve');
 
 // Use me when needed
 // const inspect = (object) => {
@@ -8,7 +7,11 @@ const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
 // };
 
 /**
+ * Check if two regexes are equal
  * Stolen from https://stackoverflow.com/questions/10776600/testing-for-equality-of-regular-expressions
+ *
+ * @param {RegExp} x
+ * @param {RegExp} y
  */
 const regexEqual = (x, y) => {
   return (
@@ -21,26 +24,28 @@ const regexEqual = (x, y) => {
   );
 };
 
-const generateIncludes = (modules) => {
-  return [
-    new RegExp(`(${modules.map(safePath).join('|')})$`),
-    new RegExp(`(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`),
-  ];
-};
-
-const generateExcludes = (modules) => {
-  return [
-    new RegExp(
-      `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})(${PATH_DELIMITER}|$)(?!.*node_modules))`
-    ),
-  ];
-};
-
 /**
- * On Windows, the Regex won't match as Webpack tries to resolve the
- * paths of the modules. So we need to check for \\ and /
+ *
+ * @param {string[]} modules
  */
-const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
+const generateMatcher = (modules) => {
+  const resolvedModules = modules
+    .map((module) => {
+      const resolved = resolve.sync(module);
+
+      if (!resolved)
+        throw new Error(
+          `next-transpile-modules: could not resolve module "${module}". Are you sure the name of the module you are trying to transpile is correct?`
+        );
+
+      return resolved;
+    })
+    .map(path.dirname);
+
+  const matcher = (path) => resolvedModules.some((modulePath) => path.includes(modulePath));
+
+  return matcher;
+};
 
 /**
  * Actual Next.js plugin
@@ -52,13 +57,10 @@ const withTmInitializer = (modules = [], options = {}) => {
     const resolveSymlinks = options.resolveSymlinks || false;
     const isWebpack5 = options.unstable_webpack5 || false;
 
-    const includes = generateIncludes(modules);
-    const excludes = generateExcludes(modules);
-    const hasInclude = (ctx, req) => {
-      return includes.find((include) =>
-        req.startsWith('.') ? include.test(path.resolve(ctx, req)) : include.test(req)
-      );
-    };
+    const matcher = generateMatcher(modules);
+    const unmatcher = (path) => !matcher(path);
+
+    const externalHasInclude = (context, request) => matcher(path.resolve(context, request));
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
@@ -80,13 +82,14 @@ const withTmInitializer = (modules = [], options = {}) => {
           config.externals = config.externals.map((external) => {
             if (typeof external !== 'function') return external;
 
-            return isWebpack5
-              ? ({ context, request }, cb) => {
-                  return hasInclude(context, request) ? cb() : external({ context, request }, cb);
-                }
-              : (ctx, req, cb) => {
-                  return hasInclude(ctx, req) ? cb() : external(ctx, req, cb);
-                };
+            if (isWebpack5)
+              return ({ context, request }, cb) => {
+                return externalHasInclude(context, request) ? cb() : external({ context, request }, cb);
+              };
+
+            return (context, request, cb) => {
+              return externalHasInclude(context, request) ? cb() : external(context, request, cb);
+            };
           });
         }
 
@@ -95,13 +98,13 @@ const withTmInitializer = (modules = [], options = {}) => {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             use: options.defaultLoaders.babel,
-            include: includes,
+            include: matcher,
           });
         } else {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             loader: options.defaultLoaders.babel,
-            include: includes,
+            include: matcher,
           });
         }
 
@@ -120,17 +123,19 @@ const withTmInitializer = (modules = [], options = {}) => {
           );
 
           if (nextCssLoader) {
-            nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(includes) : includes;
-            nextCssLoader.issuer.not = excludes;
+            nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(matcher) : matcher;
+            nextCssLoader.issuer.not = [unmatcher];
             delete nextCssLoader.issuer.and;
+          } else {
+            console.warn('next-transpile-modules: could not find default CSS rule, CSS imports may not work');
           }
 
           if (nextSassLoader) {
-            nextSassLoader.issuer.or = nextSassLoader.issuer.and
-              ? nextSassLoader.issuer.and.concat(includes)
-              : includes;
-            nextSassLoader.issuer.not = excludes;
+            nextSassLoader.issuer.or = nextSassLoader.issuer.and ? nextSassLoader.issuer.and.concat(matcher) : matcher;
+            nextSassLoader.issuer.not = [unmatcher];
             delete nextSassLoader.issuer.and;
+          } else {
+            console.warn('next-transpile-modules: could not find default SASS rule, SASS imports may not work');
           }
         }
 
@@ -153,7 +158,7 @@ const withTmInitializer = (modules = [], options = {}) => {
           ? config.watchOptions.ignored.concat(modules)
           : config.watchOptions.ignored
               .filter((pattern) => !regexEqual(pattern, /[\\/]node_modules[\\/]/) && pattern !== '**/node_modules/**')
-              .concat(excludes);
+              .concat(unmatcher);
 
         config.watchOptions.ignored = ignored;
 
