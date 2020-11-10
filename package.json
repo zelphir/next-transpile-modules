@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "pretest": "node --trace-uncaught src/__tests__/setup.js",
+    "quickie": "node --trace-uncaught src/__tests__/setup.js && npm run dev --prefix src/__tests__/__apps__/npm-basic",
     "test": "jest --forceExit",
     "test:debug": "jest --detectOpenHandles --forceExit",
     "test:lint": "eslint .",

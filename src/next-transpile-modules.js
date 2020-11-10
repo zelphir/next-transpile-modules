@@ -25,10 +25,10 @@ const regexEqual = (x, y) => {
 };
 
 /**
- *
+ * Resolve modules to their real paths
  * @param {string[]} modules
  */
-const generateMatcher = (modules) => {
+const generateResolvedModules = (modules) => {
   const resolvedModules = modules
     .map((module) => {
       const resolved = resolve.sync(module);
@@ -42,13 +42,13 @@ const generateMatcher = (modules) => {
     })
     .map(path.dirname);
 
-  const matcher = (path) => resolvedModules.some((modulePath) => path.includes(modulePath));
-
-  return matcher;
+  return resolvedModules;
 };
 
 /**
- * Actual Next.js plugin
+ * Transpile modules with Next.js Babel configuration
+ * @param {string[]} modules
+ * @param {{resolveSymlinks?: boolean; unstable_webpack5?: boolean}} options
  */
 const withTmInitializer = (modules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
@@ -57,10 +57,12 @@ const withTmInitializer = (modules = [], options = {}) => {
     const resolveSymlinks = options.resolveSymlinks || false;
     const isWebpack5 = options.unstable_webpack5 || false;
 
-    const matcher = generateMatcher(modules);
-    const unmatcher = (path) => !matcher(path);
+    const resolvedModules = generateResolvedModules(modules);
 
-    const externalHasInclude = (context, request) => matcher(path.resolve(context, request));
+    // Generate Webpack condition for the passed modules
+    // https://webpack.js.org/configuration/module/#ruleinclude
+    const match = (path) => resolvedModules.some((modulePath) => path.includes(modulePath));
+    const unmatch = (path) => resolvedModules.every((modulePath) => !path.includes(modulePath));
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
@@ -77,18 +79,41 @@ const withTmInitializer = (modules = [], options = {}) => {
         // transpiled.
         config.resolve.symlinks = resolveSymlinks;
 
+        const hasInclude = (ctx, req) => {
+          const test = resolvedModules.some((mod) => {
+            // If we the code requires/import an absolute path
+            if (!req.startsWith('.')) {
+              try {
+                const re = resolve.sync(req);
+
+                if (!re) return false;
+
+                return re.includes(mod);
+              } catch (err) {
+                return false;
+              }
+            }
+
+            // Otherwise, for relative imports
+            return path.resolve(ctx, req).includes(mod);
+          });
+
+          return test;
+        };
+
         // Since Next.js 8.1.0, config.externals is undefined
         if (config.externals) {
           config.externals = config.externals.map((external) => {
             if (typeof external !== 'function') return external;
 
-            if (isWebpack5)
+            if (isWebpack5) {
               return ({ context, request }, cb) => {
-                return externalHasInclude(context, request) ? cb() : external({ context, request }, cb);
+                return hasInclude(context, request) ? cb() : external({ context, request }, cb);
               };
+            }
 
-            return (context, request, cb) => {
-              return externalHasInclude(context, request) ? cb() : external(context, request, cb);
+            return (ctx, req, cb) => {
+              return hasInclude(ctx, req) ? cb() : external(ctx, req, cb);
             };
           });
         }
@@ -98,13 +123,13 @@ const withTmInitializer = (modules = [], options = {}) => {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             use: options.defaultLoaders.babel,
-            include: matcher,
+            include: match,
           });
         } else {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             loader: options.defaultLoaders.babel,
-            include: matcher,
+            include: match,
           });
         }
 
@@ -123,16 +148,16 @@ const withTmInitializer = (modules = [], options = {}) => {
           );
 
           if (nextCssLoader) {
-            nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(matcher) : matcher;
-            nextCssLoader.issuer.not = [unmatcher];
+            nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(match) : match;
+            nextCssLoader.issuer.not = [unmatch];
             delete nextCssLoader.issuer.and;
           } else {
             console.warn('next-transpile-modules: could not find default CSS rule, CSS imports may not work');
           }
 
           if (nextSassLoader) {
-            nextSassLoader.issuer.or = nextSassLoader.issuer.and ? nextSassLoader.issuer.and.concat(matcher) : matcher;
-            nextSassLoader.issuer.not = [unmatcher];
+            nextSassLoader.issuer.or = nextSassLoader.issuer.and ? nextSassLoader.issuer.and.concat(match) : match;
+            nextSassLoader.issuer.not = [unmatch];
             delete nextSassLoader.issuer.and;
           } else {
             console.warn('next-transpile-modules: could not find default SASS rule, SASS imports may not work');
@@ -158,7 +183,7 @@ const withTmInitializer = (modules = [], options = {}) => {
           ? config.watchOptions.ignored.concat(modules)
           : config.watchOptions.ignored
               .filter((pattern) => !regexEqual(pattern, /[\\/]node_modules[\\/]/) && pattern !== '**/node_modules/**')
-              .concat(unmatcher);
+              .concat(unmatch);
 
         config.watchOptions.ignored = ignored;
 
