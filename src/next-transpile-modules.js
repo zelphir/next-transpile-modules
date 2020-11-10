@@ -175,17 +175,12 @@ const withTmInitializer = (modules = [], options = {}) => {
       // webpackDevMiddleware needs to be told to watch the changes in the
       // transpiled modules directories
       webpackDevMiddleware(config) {
-        // Replace /node_modules/ by the new exclude RegExp (including the modules
-        // that are going to be transpiled)
-        // https://github.com/zeit/next.js/blob/815f2e91386a0cd046c63cbec06e4666cff85971/packages/next/server/hot-reloader.js#L335
-
-        const ignored = isWebpack5
-          ? config.watchOptions.ignored.concat(modules)
-          : config.watchOptions.ignored
-              .filter((pattern) => !regexEqual(pattern, /[\\/]node_modules[\\/]/) && pattern !== '**/node_modules/**')
-              .concat(unmatch);
-
-        config.watchOptions.ignored = ignored;
+        if (isWebpack5) {
+          // FIXME: hot reloading is not working here
+          config.watchOptions.ignored = [...resolvedModules.map((mod) => `!${mod}/**`), ...config.watchOptions.ignored];
+        } else {
+          config.watchOptions.ignored = [...resolvedModules.map((mod) => `!${mod}/**`), ...config.watchOptions.ignored];
+        }
 
         if (typeof nextConfig.webpackDevMiddleware === 'function') {
           return nextConfig.webpackDevMiddleware(config);
