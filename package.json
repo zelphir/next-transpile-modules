@@ -40,8 +40,7 @@
     "webpack"
   ],
   "dependencies": {
-    "micromatch": "^4.0.2",
-    "slash": "^3.0.0"
+    "resolve": "^1.19.0"
   },
   "devDependencies": {
     "@types/jest-environment-puppeteer": "4.4.0",
