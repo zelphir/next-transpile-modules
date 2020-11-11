@@ -2,6 +2,7 @@ const path = require('path');
 const resolve = require('resolve');
 
 // Use me when needed
+// const util = require('util');
 // const inspect = (object) => {
 //   console.log(util.inspect(object, { showHidden: false, depth: null }));
 // };
@@ -164,26 +165,14 @@ const withTmInitializer = (modules = [], options = {}) => {
           }
         }
 
+        // Make hot reloading work!
+        // FIXME: not working on Wepback 5
+        // https://github.com/vercel/next.js/issues/13039
+        config.watchOptions.ignored = [...resolvedModules.map((mod) => `!${mod}/**`), ...config.watchOptions.ignored];
+
         // Overload the Webpack config if it was already overloaded
         if (typeof nextConfig.webpack === 'function') {
           return nextConfig.webpack(config, options);
-        }
-
-        return config;
-      },
-
-      // webpackDevMiddleware needs to be told to watch the changes in the
-      // transpiled modules directories
-      webpackDevMiddleware(config) {
-        if (isWebpack5) {
-          // FIXME: hot reloading is not working here
-          config.watchOptions.ignored = [...resolvedModules.map((mod) => `!${mod}/**`), ...config.watchOptions.ignored];
-        } else {
-          config.watchOptions.ignored = [...resolvedModules.map((mod) => `!${mod}/**`), ...config.watchOptions.ignored];
-        }
-
-        if (typeof nextConfig.webpackDevMiddleware === 'function') {
-          return nextConfig.webpackDevMiddleware(config);
         }
 
         return config;
