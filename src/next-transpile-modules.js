@@ -1,5 +1,6 @@
 const path = require('path');
 const resolve = require('resolve');
+const fs = require('fs')
 
 // Use me when needed
 // const util = require('util');
@@ -25,24 +26,47 @@ const regexEqual = (x, y) => {
   );
 };
 
+const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
+
+const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
+
+const generateExcludes = (modules) => {
+  return new RegExp(
+    `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})(${PATH_DELIMITER}|$)(?!.*node_modules))`
+  );
+};
+
+const generateIncludes = (modules) => {
+  return [
+    new RegExp(`(${modules.map(safePath).join('|')})$`),
+    new RegExp(`(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`),
+  ];
+};
+
 /**
  * Resolve modules to their real paths
  * @param {string[]} modules
  */
-const generateResolvedModules = (modules) => {
+const generateResolvedModules = modules => {
   const resolvedModules = modules
-    .map((module) => {
-      const resolved = resolve.sync(module);
-
+    .map(module => {
+      let resolved;
+      try {
+        resolved = resolve.sync(module);
+      } catch (e) {
+        require.main.paths.find(resolutionPath => {
+          if (fs.existsSync(path.join(resolutionPath, module))) {
+            resolved = path.join(resolutionPath, module);
+          }
+        });
+      }
       if (!resolved)
         throw new Error(
           `next-transpile-modules: could not resolve module "${module}". Are you sure the name of the module you are trying to transpile is correct?`
         );
-
       return resolved;
     })
     .map(path.dirname);
-
   return resolvedModules;
 };
 
@@ -169,6 +193,20 @@ const withTmInitializer = (modules = [], options = {}) => {
         // FIXME: not working on Wepback 5
         // https://github.com/vercel/next.js/issues/13039
         config.watchOptions.ignored = [...resolvedModules.map((mod) => `!${mod}/**`), ...config.watchOptions.ignored];
+
+        //dunno what to do about above
+        if (isWebpack5) {
+          config.watchOptions.ignored = generateExcludes(modules);
+
+          config.cache = {
+            type: 'filesystem',
+            // paths dont seem to work
+            // might need better resolution to the paths. dirname can trim off "thepackage" from @company/thepackage
+            managedPaths: resolvedModules,
+          };
+          // slow, real slow, but works
+          config.cache = false;
+        }
 
         // Overload the Webpack config if it was already overloaded
         if (typeof nextConfig.webpack === 'function') {
