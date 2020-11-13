@@ -1,6 +1,6 @@
 const path = require('path');
 const resolve = require('resolve');
-const fs = require('fs')
+const fs = require('fs');
 
 // Use me when needed
 // const util = require('util');
@@ -47,14 +47,14 @@ const generateIncludes = (modules) => {
  * Resolve modules to their real paths
  * @param {string[]} modules
  */
-const generateResolvedModules = modules => {
+const generateResolvedModules = (modules) => {
   const resolvedModules = modules
-    .map(module => {
+    .map((module) => {
       let resolved;
       try {
         resolved = resolve.sync(module);
       } catch (e) {
-        require.main.paths.find(resolutionPath => {
+        require.main.paths.find((resolutionPath) => {
           if (fs.existsSync(path.join(resolutionPath, module))) {
             resolved = path.join(resolutionPath, module);
           }
@@ -196,7 +196,15 @@ const withTmInitializer = (modules = [], options = {}) => {
 
         //dunno what to do about above
         if (isWebpack5) {
+          // config.watchOptions.ignored = [generateExcludes(modules)];
+
+          // console.log(config.watchOptions.ignored);
+          config.watchOptions.ignored = /node_modules/;
           config.watchOptions.ignored = generateExcludes(modules);
+
+          console.log(/node_modules/);
+          console.log(generateExcludes(modules));
+          console.log('-------------');
 
           config.cache = {
             type: 'filesystem',
@@ -205,7 +213,7 @@ const withTmInitializer = (modules = [], options = {}) => {
             managedPaths: resolvedModules,
           };
           // slow, real slow, but works
-          config.cache = false;
+          // config.cache = false;
         }
 
         // Overload the Webpack config if it was already overloaded
