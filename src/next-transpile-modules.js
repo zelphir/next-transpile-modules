@@ -1,11 +1,19 @@
 const path = require('path');
-const resolve = require('resolve');
+const enhancedResolve = require('enhanced-resolve');
 
 // Use me when needed
 // const util = require('util');
 // const inspect = (object) => {
 //   console.log(util.inspect(object, { showHidden: false, depth: null }));
 // };
+
+/**
+ * We create our own Node.js resolver that can ignore symlinks resolution and
+ * can support PnP
+ */
+const resolve = enhancedResolve.create.sync({
+  symlinks: false,
+});
 
 /**
  * Check if two regexes are equal
@@ -32,7 +40,13 @@ const regexEqual = (x, y) => {
 const generateResolvedModules = (modules) => {
   const resolvedModules = modules
     .map((module) => {
-      const resolved = resolve.sync(module);
+      let resolved;
+
+      try {
+        resolved = resolve(__dirname, module);
+      } catch (e) {
+        console.error(e);
+      }
 
       if (!resolved)
         throw new Error(
@@ -85,11 +99,11 @@ const withTmInitializer = (modules = [], options = {}) => {
             // If we the code requires/import an absolute path
             if (!req.startsWith('.')) {
               try {
-                const re = resolve.sync(req);
+                const resolved = resolve(__dirname, req);
 
-                if (!re) return false;
+                if (!resolved) return false;
 
-                return re.includes(mod);
+                return resolved.includes(mod);
               } catch (err) {
                 return false;
               }
