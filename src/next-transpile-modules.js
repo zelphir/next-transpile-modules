@@ -77,7 +77,6 @@ const withTmInitializer = (modules = [], options = {}) => {
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
     const match = (path) => resolvedModules.some((modulePath) => path.includes(modulePath));
-    const unmatch = (path) => resolvedModules.every((modulePath) => !path.includes(modulePath));
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
@@ -164,7 +163,7 @@ const withTmInitializer = (modules = [], options = {}) => {
 
           if (nextCssLoader) {
             nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(match) : match;
-            nextCssLoader.issuer.not = [unmatch];
+            delete nextCssLoader.issuer.not;
             delete nextCssLoader.issuer.and;
           } else {
             console.warn('next-transpile-modules: could not find default CSS rule, CSS imports may not work');
@@ -172,7 +171,7 @@ const withTmInitializer = (modules = [], options = {}) => {
 
           if (nextSassLoader) {
             nextSassLoader.issuer.or = nextSassLoader.issuer.and ? nextSassLoader.issuer.and.concat(match) : match;
-            nextSassLoader.issuer.not = [unmatch];
+            delete nextSassLoader.issuer.not;
             delete nextSassLoader.issuer.and;
           } else {
             console.warn('next-transpile-modules: could not find default SASS rule, SASS imports may not work');
