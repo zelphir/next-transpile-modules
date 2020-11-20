@@ -16,9 +16,9 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "sass": "^1.27.0",
-    "shared": "file:../_shared",
-    "shared-ts": "file:../_shared-ts",
-    "shared-ui": "file:../_shared-ui"
+    "shared": "^1.0.0",
+    "shared-ts": "^1.0.0",
+    "shared-ui": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^14.14.5",
