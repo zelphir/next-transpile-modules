@@ -64,11 +64,9 @@ const generateResolvedModules = (modules) => {
  * Logger for the debug mode
  */
 const createLogger = (enable) => {
-  if (enable) {
-    return (message) => console.info(`next-transpile-modules - ${message}`);
-  }
-
-  return () => {};
+  return (message, force) => {
+    if (enable || force) console.info(`next-transpile-modules - ${message}`);
+  };
 };
 
 /**
@@ -87,6 +85,8 @@ const withTmInitializer = (modules = [], options = {}) => {
     const logger = createLogger(debug);
 
     const resolvedModules = generateResolvedModules(modules);
+
+    if (isWebpack5) logger(`WARNING experimental Webpack 5 support enabled`, true);
 
     logger(`the following paths will get transpiled:\n${resolvedModules.map((mod) => `  - ${mod}`).join('\n')}`);
 
@@ -114,12 +114,12 @@ const withTmInitializer = (modules = [], options = {}) => {
         // transpiled.
         config.resolve.symlinks = resolveSymlinks;
 
-        const hasInclude = (ctx, req) => {
+        const hasInclude = (context, request) => {
           const test = resolvedModules.some((mod) => {
             // If we the code requires/import an absolute path
-            if (!req.startsWith('.')) {
+            if (!request.startsWith('.')) {
               try {
-                const resolved = resolve(__dirname, req);
+                const resolved = resolve(__dirname, request);
 
                 if (!resolved) return false;
 
@@ -130,7 +130,7 @@ const withTmInitializer = (modules = [], options = {}) => {
             }
 
             // Otherwise, for relative imports
-            return path.resolve(ctx, req).includes(mod);
+            return path.resolve(context, request).includes(mod);
           });
 
           return test;
@@ -147,8 +147,8 @@ const withTmInitializer = (modules = [], options = {}) => {
               };
             }
 
-            return (ctx, req, cb) => {
-              return hasInclude(ctx, req) ? cb() : external(ctx, req, cb);
+            return (context, request, cb) => {
+              return hasInclude(context, request) ? cb() : external(context, request, cb);
             };
           });
         }
