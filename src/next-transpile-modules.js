@@ -61,9 +61,20 @@ const generateResolvedModules = (modules) => {
 };
 
 /**
+ * Logger for the debug mode
+ */
+const createLogger = (enable) => {
+  if (enable) {
+    return (message) => console.info(`next-transpile-modules - ${message}`);
+  }
+
+  return () => {};
+};
+
+/**
  * Transpile modules with Next.js Babel configuration
  * @param {string[]} modules
- * @param {{resolveSymlinks?: boolean; unstable_webpack5?: boolean}} options
+ * @param {{resolveSymlinks?: boolean; debug?: boolean, unstable_webpack5?: boolean}} options
  */
 const withTmInitializer = (modules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
@@ -71,12 +82,22 @@ const withTmInitializer = (modules = [], options = {}) => {
 
     const resolveSymlinks = options.resolveSymlinks || false;
     const isWebpack5 = options.unstable_webpack5 || false;
+    const debug = options.debug || false;
+
+    const logger = createLogger(debug);
 
     const resolvedModules = generateResolvedModules(modules);
 
+    logger(`the following paths will get transpiled:\n${resolvedModules.map((mod) => `  - ${mod}`).join('\n')}`);
+
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
-    const match = (path) => resolvedModules.some((modulePath) => path.includes(modulePath));
+    const match = (path) =>
+      resolvedModules.some((modulePath) => {
+        const transpiled = path.includes(modulePath);
+        logger(`${transpiled} ${path}`);
+        return transpiled;
+      });
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
