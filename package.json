@@ -18,7 +18,7 @@
     "test:formatting:fix": "prettier --check \"**/*.js\" --write",
     "test:prepare:npm-basic": "npm run build --prefix=src/__tests__/__apps__/npm-basic",
     "test:prepare:yarn-worskpaces": "yarn --cwd src/__tests__/__apps__/yarn-workspaces/app run build",
-    "test:prepare:webpack-5": "yarn --cwd src/__tests__/__apps__/webpack-5 run build",
+    "test:prepare:webpack-5": "yarn --cwd src/__tests__/__apps__/webpack-5/app run build",
     "test:prepare:pnpm": "npm run build --prefix=src/__tests__/__apps__/pnpm",
     "test:prepare": "npm run test:prepare:npm-basic && npm run test:prepare:yarn-worskpaces && npm run test:prepare:webpack-5 && npm run test:prepare:pnpm"
   },
