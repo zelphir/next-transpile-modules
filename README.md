@@ -192,6 +192,10 @@ more:
 - check the [compatibility table](#compatibility-table) of this plugin
 - read more about semver and version resolutions: https://docs.npmjs.com/misc/semver
 
+### I have trouble making it work with v5
+
+Please make sure to [read the changelog](https://github.com/martpie/next-transpile-modules/releases).
+
 ### I have trouble making it work with Next.js 7
 
 Next.js 7 introduced Webpack 4 and Babel 7, [which changed a couple of things](https://github.com/zeit/next.js/issues/5393#issuecomment-458517433), especially for TypeScript and Flow plugins.
