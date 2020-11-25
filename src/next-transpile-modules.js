@@ -1,4 +1,5 @@
 const path = require('path');
+const process = require('process');
 const enhancedResolve = require('enhanced-resolve');
 
 // Use me when needed
@@ -45,7 +46,7 @@ const generateResolvedModules = (modules) => {
       let resolved;
 
       try {
-        resolved = resolve(__dirname, module);
+        resolved = resolve(process.cwd(), module);
       } catch (e) {
         console.error(e);
       }
@@ -121,7 +122,7 @@ const withTmInitializer = (modules = [], options = {}) => {
             // If we the code requires/import an absolute path
             if (!request.startsWith('.')) {
               try {
-                const resolved = resolve(__dirname, request);
+                const resolved = resolve(process.cwd(), request);
 
                 if (!resolved) return false;
 
