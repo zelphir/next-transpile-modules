@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/martpie/next-transpile-modules/workflows/tests/badge.svg)
 ![Dependencies](https://img.shields.io/david/martpie/next-transpile-modules)
 
-Transpile untranspiled modules from `node_modules` using the Next.js Babel configuration.
+Transpile modules from `node_modules` using the Next.js Babel configuration.
 
 Makes it easy to have local libraries and keep a slick, manageable dev experience.
 
@@ -26,7 +26,7 @@ What this plugin **does not aim** to solve:
 
 | Next.js version   | Plugin version |
 | ----------------- | -------------- |
-| Next.js 9.5+ / 10 | 4.x            |
+| Next.js 9.5+ / 10 | 4.x, 5.x       |
 | Next.js 9.2       | 3.x            |
 | Next.js 8 / 9     | 2.x            |
 | Next.js 6 / 7     | 1.x            |
@@ -74,6 +74,8 @@ module.exports = withTM();
 ```
 
 **note:** please declare `withTM` as your last plugin (the "most nested" one).
+
+**note 2:** make sure all your packages have [a valid `main` field](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#main).
 
 ### Scoped packages
 
@@ -278,3 +280,7 @@ module.exports = withTM({
 Please note, the above [will only work](https://github.com/zeit/next.js/issues/9022#issuecomment-610255555) if `react` is properly declared as `peerDependencies` or `devDependencies` in your referenced package.
 
 It is not a great solution, but it works. Any help to find a more future-proof solution is welcome.
+
+## Credits
+
+All the honor goes to [James Gorrie](https://github.com/jamesgorrie) who created the first version of this plugin.
