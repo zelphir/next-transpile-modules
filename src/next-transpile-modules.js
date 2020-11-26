@@ -1,14 +1,29 @@
 const path = require('path');
-
-const PATH_DELIMITER = '[\\\\/]'; // match 2 antislashes or one slash
+const process = require('process');
+const enhancedResolve = require('enhanced-resolve');
 
 // Use me when needed
+// const util = require('util');
 // const inspect = (object) => {
 //   console.log(util.inspect(object, { showHidden: false, depth: null }));
 // };
 
 /**
+ * We create our own Node.js resolver that can ignore symlinks resolution and
+ * can support PnP
+ */
+const resolve = enhancedResolve.create.sync({
+  symlinks: false,
+  extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.css', '.scss', '.sass'],
+  mainFields: ['main', 'source'],
+});
+
+/**
+ * Check if two regexes are equal
  * Stolen from https://stackoverflow.com/questions/10776600/testing-for-equality-of-regular-expressions
+ *
+ * @param {RegExp} x
+ * @param {RegExp} y
  */
 const regexEqual = (x, y) => {
   return (
@@ -21,44 +36,71 @@ const regexEqual = (x, y) => {
   );
 };
 
-const generateIncludes = (modules) => {
-  return [
-    new RegExp(`(${modules.map(safePath).join('|')})$`),
-    new RegExp(`(${modules.map(safePath).join('|')})${PATH_DELIMITER}(?!.*node_modules)`)
-  ];
-};
+/**
+ * Resolve modules to their real paths
+ * @param {string[]} modules
+ */
+const generateResolvedModules = (modules) => {
+  const resolvedModules = modules
+    .map((module) => {
+      let resolved;
 
-const generateExcludes = (modules) => {
-  return [
-    new RegExp(
-      `node_modules${PATH_DELIMITER}(?!(${modules.map(safePath).join('|')})(${PATH_DELIMITER}|$)(?!.*node_modules))`
-    )
-  ];
+      try {
+        resolved = resolve(process.cwd(), module);
+      } catch (e) {
+        console.error(e);
+      }
+
+      if (!resolved)
+        throw new Error(
+          `next-transpile-modules: could not resolve module "${module}". Are you sure the name of the module you are trying to transpile is correct?`
+        );
+
+      return resolved;
+    })
+    .map(path.dirname);
+
+  return resolvedModules;
 };
 
 /**
- * On Windows, the Regex won't match as Webpack tries to resolve the
- * paths of the modules. So we need to check for \\ and /
+ * Logger for the debug mode
  */
-const safePath = (module) => module.split(/[\\\/]/g).join(PATH_DELIMITER);
+const createLogger = (enable) => {
+  return (message, force) => {
+    if (enable || force) console.info(`next-transpile-modules - ${message}`);
+  };
+};
 
 /**
- * Actual Next.js plugin
+ * Transpile modules with Next.js Babel configuration
+ * @param {string[]} modules
+ * @param {{resolveSymlinks?: boolean; debug?: boolean, unstable_webpack5?: boolean}} options
  */
-const withTmInitializer = (transpileModules = [], options = {}) => {
+const withTmInitializer = (modules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
-    if (transpileModules.length === 0) return nextConfig;
+    if (modules.length === 0) return nextConfig;
 
     const resolveSymlinks = options.resolveSymlinks || false;
     const isWebpack5 = options.unstable_webpack5 || false;
+    const debug = options.debug || false;
 
-    const includes = generateIncludes(transpileModules);
-    const excludes = generateExcludes(transpileModules);
-    const hasInclude = (ctx, req) => {
-      return includes.find((include) =>
-        req.startsWith('.') ? include.test(path.resolve(ctx, req)) : include.test(req)
-      );
-    };
+    const logger = createLogger(debug);
+
+    const resolvedModules = generateResolvedModules(modules);
+
+    if (isWebpack5) logger(`WARNING experimental Webpack 5 support enabled`, true);
+
+    logger(`the following paths will get transpiled:\n${resolvedModules.map((mod) => `  - ${mod}`).join('\n')}`);
+
+    // Generate Webpack condition for the passed modules
+    // https://webpack.js.org/configuration/module/#ruleinclude
+    const match = (path) =>
+      resolvedModules.some((modulePath) => {
+        const transpiled = path.includes(modulePath);
+        logger(`${transpiled} ${path}`);
+        return transpiled;
+      });
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
@@ -75,18 +117,42 @@ const withTmInitializer = (transpileModules = [], options = {}) => {
         // transpiled.
         config.resolve.symlinks = resolveSymlinks;
 
+        const hasInclude = (context, request) => {
+          const test = resolvedModules.some((mod) => {
+            // If we the code requires/import an absolute path
+            if (!request.startsWith('.')) {
+              try {
+                const resolved = resolve(process.cwd(), request);
+
+                if (!resolved) return false;
+
+                return resolved.includes(mod);
+              } catch (err) {
+                return false;
+              }
+            }
+
+            // Otherwise, for relative imports
+            return path.resolve(context, request).includes(mod);
+          });
+
+          return test;
+        };
+
         // Since Next.js 8.1.0, config.externals is undefined
         if (config.externals) {
           config.externals = config.externals.map((external) => {
             if (typeof external !== 'function') return external;
 
-            return isWebpack5
-              ? ({ context, request }, cb) => {
-                  return hasInclude(context, request) ? cb() : external({ context, request }, cb);
-                }
-              : (ctx, req, cb) => {
-                  return hasInclude(ctx, req) ? cb() : external(ctx, req, cb);
-                };
+            if (isWebpack5) {
+              return ({ context, request }, cb) => {
+                return hasInclude(context, request) ? cb() : external({ context, request }, cb);
+              };
+            }
+
+            return (context, request, cb) => {
+              return hasInclude(context, request) ? cb() : external(context, request, cb);
+            };
           });
         }
 
@@ -95,13 +161,19 @@ const withTmInitializer = (transpileModules = [], options = {}) => {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             use: options.defaultLoaders.babel,
-            include: includes
+            include: match,
+          });
+
+          // IMPROVE ME: we are losing all the cache on node_modules, which is terrible
+          // The problem is managedPaths does not allow to isolate specific specific folders
+          config.snapshot = Object.assign(config.snapshot || {}, {
+            managedPaths: [],
           });
         } else {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             loader: options.defaultLoaders.babel,
-            include: includes
+            include: match,
           });
         }
 
@@ -120,52 +192,29 @@ const withTmInitializer = (transpileModules = [], options = {}) => {
           );
 
           if (nextCssLoader) {
-            nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(includes) : includes;
-            nextCssLoader.issuer.not = excludes;
+            nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(match) : match;
+            delete nextCssLoader.issuer.not;
             delete nextCssLoader.issuer.and;
+          } else {
+            console.warn('next-transpile-modules: could not find default CSS rule, CSS imports may not work');
           }
 
           if (nextSassLoader) {
-            nextSassLoader.issuer.or = nextSassLoader.issuer.and
-              ? nextSassLoader.issuer.and.concat(includes)
-              : includes;
-            nextSassLoader.issuer.not = excludes;
+            nextSassLoader.issuer.or = nextSassLoader.issuer.and ? nextSassLoader.issuer.and.concat(match) : match;
+            delete nextSassLoader.issuer.not;
             delete nextSassLoader.issuer.and;
-          }
-
-          // Hack our way to disable errors on node_modules CSS modules
-          const nextErrorCssModuleLoader = nextCssLoaders.oneOf.find(
-            (rule) =>
-              rule.use &&
-              rule.use.loader === 'error-loader' &&
-              rule.use.options &&
-              (rule.use.options.reason ===
-                'CSS Modules \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-modules-npm' ||
-                rule.use.options.reason ===
-                  'CSS Modules cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-modules-npm')
-          );
-
-          if (nextErrorCssModuleLoader) {
-            nextErrorCssModuleLoader.exclude = includes;
-          }
-
-          const nextErrorCssGlobalLoader = nextCssLoaders.oneOf.find(
-            (rule) =>
-              rule.use &&
-              rule.use.loader === 'error-loader' &&
-              rule.use.options &&
-              (rule.use.options.reason ===
-                'Global CSS \u001b[1mcannot\u001b[22m be imported from within \u001b[1mnode_modules\u001b[22m.\n' +
-                  'Read more: https://err.sh/next.js/css-npm' ||
-                rule.use.options.reason ===
-                  'Global CSS cannot be imported from within node_modules.\nRead more: https://err.sh/next.js/css-npm')
-          );
-
-          if (nextErrorCssGlobalLoader) {
-            nextErrorCssGlobalLoader.exclude = includes;
+          } else {
+            console.warn('next-transpile-modules: could not find default SASS rule, SASS imports may not work');
           }
         }
+
+        // Make hot reloading work!
+        // FIXME: not working on Wepback 5
+        // https://github.com/vercel/next.js/issues/13039
+        config.watchOptions.ignored = [
+          ...config.watchOptions.ignored.filter((pattern) => pattern !== '**/node_modules/**'),
+          `**node_modules/{${modules.map((mod) => `!(${mod})`).join(',')}}/**/*`,
+        ];
 
         // Overload the Webpack config if it was already overloaded
         if (typeof nextConfig.webpack === 'function') {
@@ -174,28 +223,6 @@ const withTmInitializer = (transpileModules = [], options = {}) => {
 
         return config;
       },
-
-      // webpackDevMiddleware needs to be told to watch the changes in the
-      // transpiled modules directories
-      webpackDevMiddleware(config) {
-        // Replace /node_modules/ by the new exclude RegExp (including the modules
-        // that are going to be transpiled)
-        // https://github.com/zeit/next.js/blob/815f2e91386a0cd046c63cbec06e4666cff85971/packages/next/server/hot-reloader.js#L335
-
-        const ignored = isWebpack5
-          ? config.watchOptions.ignored.concat(transpileModules)
-          : config.watchOptions.ignored
-              .filter((pattern) => !regexEqual(pattern, /[\\/]node_modules[\\/]/) && pattern !== '**/node_modules/**')
-              .concat(excludes);
-
-        config.watchOptions.ignored = ignored;
-
-        if (typeof nextConfig.webpackDevMiddleware === 'function') {
-          return nextConfig.webpackDevMiddleware(config);
-        }
-
-        return config;
-      }
     });
   };
 
