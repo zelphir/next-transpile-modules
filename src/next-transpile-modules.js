@@ -1,12 +1,16 @@
 const path = require('path');
 const process = require('process');
+
 const enhancedResolve = require('enhanced-resolve');
+const pkgDir = require('pkg-dir');
 
 // Use me when needed
 // const util = require('util');
 // const inspect = (object) => {
 //   console.log(util.inspect(object, { showHidden: false, depth: null }));
 // };
+
+const CWD = process.cwd();
 
 /**
  * We create our own Node.js resolver that can ignore symlinks resolution and
@@ -37,28 +41,44 @@ const regexEqual = (x, y) => {
 };
 
 /**
+ * Return the root path (package.json directory) of a given module
+ * @param {string} module
+ */
+const getModuleRootDirectory = (module) => {
+  let moduleRootDirectory;
+  let moduleDirectory;
+
+  try {
+    // Get the module path
+    moduleDirectory = resolve(CWD, module);
+
+    if (!moduleDirectory) {
+      throw new Error(
+        `next-transpile-modules - could not resolve module "${module}". Are you sure the name of the module you are trying to transpile is correct?`
+      );
+    }
+
+    try {
+      // Get the location of its package.json
+      moduleRootDirectory = pkgDir.sync(moduleDirectory);
+    } catch (err) {
+      throw new Error(
+        `next-transpile-modules - an error happened when trying to get the root directory of "${module}". Is it missing a package.json?\n${err}`
+      );
+    }
+  } catch (err) {
+    throw new Error(`next-transpile-modules - an unexpected error happened when trying to resolve "${module}"\n${err}`);
+  }
+
+  return moduleRootDirectory;
+};
+
+/**
  * Resolve modules to their real paths
  * @param {string[]} modules
  */
 const generateResolvedModules = (modules) => {
-  const resolvedModules = modules
-    .map((module) => {
-      let resolved;
-
-      try {
-        resolved = resolve(process.cwd(), module);
-      } catch (e) {
-        console.error(e);
-      }
-
-      if (!resolved)
-        throw new Error(
-          `next-transpile-modules: could not resolve module "${module}". Are you sure the name of the module you are trying to transpile is correct?`
-        );
-
-      return resolved;
-    })
-    .map(path.dirname);
+  const resolvedModules = modules.map(getModuleRootDirectory);
 
   return resolvedModules;
 };
@@ -122,11 +142,11 @@ const withTmInitializer = (modules = [], options = {}) => {
             // If we the code requires/import an absolute path
             if (!request.startsWith('.')) {
               try {
-                const resolved = resolve(process.cwd(), request);
+                const moduleDirectory = getModuleRootDirectory(request);
 
-                if (!resolved) return false;
+                if (!moduleDirectory) return false;
 
-                return resolved.includes(mod);
+                return moduleDirectory.includes(mod);
               } catch (err) {
                 return false;
               }
@@ -196,7 +216,7 @@ const withTmInitializer = (modules = [], options = {}) => {
             delete nextCssLoader.issuer.not;
             delete nextCssLoader.issuer.and;
           } else {
-            console.warn('next-transpile-modules: could not find default CSS rule, CSS imports may not work');
+            console.warn('next-transpile-modules - could not find default CSS rule, CSS imports may not work');
           }
 
           if (nextSassLoader) {
@@ -204,7 +224,7 @@ const withTmInitializer = (modules = [], options = {}) => {
             delete nextSassLoader.issuer.not;
             delete nextSassLoader.issuer.and;
           } else {
-            console.warn('next-transpile-modules: could not find default SASS rule, SASS imports may not work');
+            console.warn('next-transpile-modules - could not find default SASS rule, SASS imports may not work');
           }
         }
 
