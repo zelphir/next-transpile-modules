@@ -13,8 +13,8 @@ const pkgDir = require('pkg-dir');
 const CWD = process.cwd();
 
 /**
- * We create our own Node.js resolver that can ignore symlinks resolution and
- * can support PnP
+ * Our own Node.js resolver that can ignore symlinks resolution and  can support
+ * PnP
  */
 const resolve = enhancedResolve.create.sync({
   symlinks: false,
@@ -44,15 +44,15 @@ const regexEqual = (x, y) => {
  * Return the root path (package.json directory) of a given module
  * @param {string} module
  */
-const getModuleRootDirectory = (module) => {
-  let moduleRootDirectory;
-  let moduleDirectory;
+const getPackageRootDirectory = (module) => {
+  let packageDirectory;
+  let packageRootDirectory;
 
   try {
     // Get the module path
-    moduleDirectory = resolve(CWD, module);
+    packageDirectory = resolve(CWD, module);
 
-    if (!moduleDirectory) {
+    if (!packageDirectory) {
       throw new Error(
         `next-transpile-modules - could not resolve module "${module}". Are you sure the name of the module you are trying to transpile is correct?`
       );
@@ -60,7 +60,7 @@ const getModuleRootDirectory = (module) => {
 
     try {
       // Get the location of its package.json
-      moduleRootDirectory = pkgDir.sync(moduleDirectory);
+      packageRootDirectory = pkgDir.sync(packageDirectory);
     } catch (err) {
       throw new Error(
         `next-transpile-modules - an error happened when trying to get the root directory of "${module}". Is it missing a package.json?\n${err}`
@@ -70,17 +70,17 @@ const getModuleRootDirectory = (module) => {
     throw new Error(`next-transpile-modules - an unexpected error happened when trying to resolve "${module}"\n${err}`);
   }
 
-  return moduleRootDirectory;
+  return packageRootDirectory;
 };
 
 /**
  * Resolve modules to their real paths
  * @param {string[]} modules
  */
-const generateResolvedModules = (modules) => {
-  const resolvedModules = modules.map(getModuleRootDirectory);
+const generateModulesPaths = (modules) => {
+  const packagesPaths = modules.map(getPackageRootDirectory);
 
-  return resolvedModules;
+  return packagesPaths;
 };
 
 /**
@@ -107,18 +107,18 @@ const withTmInitializer = (modules = [], options = {}) => {
 
     const logger = createLogger(debug);
 
-    const resolvedModules = generateResolvedModules(modules);
+    const modulesPaths = generateModulesPaths(modules);
 
     if (isWebpack5) logger(`WARNING experimental Webpack 5 support enabled`, true);
 
-    logger(`the following paths will get transpiled:\n${resolvedModules.map((mod) => `  - ${mod}`).join('\n')}`);
+    logger(`the following paths will get transpiled:\n${modulesPaths.map((mod) => `  - ${mod}`).join('\n')}`);
 
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
     const match = (path) =>
-      resolvedModules.some((modulePath) => {
+      modulesPaths.some((modulePath) => {
         const transpiled = path.includes(modulePath);
-        logger(`${transpiled} ${path}`);
+        if (transpiled) logger(`transpiled: ${path}`);
         return transpiled;
       });
 
@@ -138,11 +138,11 @@ const withTmInitializer = (modules = [], options = {}) => {
         config.resolve.symlinks = resolveSymlinks;
 
         const hasInclude = (context, request) => {
-          const test = resolvedModules.some((mod) => {
+          const test = modulesPaths.some((mod) => {
             // If we the code requires/import an absolute path
             if (!request.startsWith('.')) {
               try {
-                const moduleDirectory = getModuleRootDirectory(request);
+                const moduleDirectory = getPackageRootDirectory(request);
 
                 if (!moduleDirectory) return false;
 
