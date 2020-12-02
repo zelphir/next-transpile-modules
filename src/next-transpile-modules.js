@@ -1,6 +1,8 @@
 const path = require('path');
 const process = require('process');
+
 const enhancedResolve = require('enhanced-resolve');
+const pkgDir = require('pkg-dir');
 
 // Use me when needed
 // const util = require('util');
@@ -8,9 +10,11 @@ const enhancedResolve = require('enhanced-resolve');
 //   console.log(util.inspect(object, { showHidden: false, depth: null }));
 // };
 
+const CWD = process.cwd();
+
 /**
- * We create our own Node.js resolver that can ignore symlinks resolution and
- * can support PnP
+ * Our own Node.js resolver that can ignore symlinks resolution and  can support
+ * PnP
  */
 const resolve = enhancedResolve.create.sync({
   symlinks: false,
@@ -37,30 +41,46 @@ const regexEqual = (x, y) => {
 };
 
 /**
+ * Return the root path (package.json directory) of a given module
+ * @param {string} module
+ */
+const getPackageRootDirectory = (module) => {
+  let packageDirectory;
+  let packageRootDirectory;
+
+  try {
+    // Get the module path
+    packageDirectory = resolve(CWD, module);
+
+    if (!packageDirectory) {
+      throw new Error(
+        `next-transpile-modules - could not resolve module "${module}". Are you sure the name of the module you are trying to transpile is correct?`
+      );
+    }
+
+    try {
+      // Get the location of its package.json
+      packageRootDirectory = pkgDir.sync(packageDirectory);
+    } catch (err) {
+      throw new Error(
+        `next-transpile-modules - an error happened when trying to get the root directory of "${module}". Is it missing a package.json?\n${err}`
+      );
+    }
+  } catch (err) {
+    throw new Error(`next-transpile-modules - an unexpected error happened when trying to resolve "${module}"\n${err}`);
+  }
+
+  return packageRootDirectory;
+};
+
+/**
  * Resolve modules to their real paths
  * @param {string[]} modules
  */
-const generateResolvedModules = (modules) => {
-  const resolvedModules = modules
-    .map((module) => {
-      let resolved;
+const generateModulesPaths = (modules) => {
+  const packagesPaths = modules.map(getPackageRootDirectory);
 
-      try {
-        resolved = resolve(process.cwd(), module);
-      } catch (e) {
-        console.error(e);
-      }
-
-      if (!resolved)
-        throw new Error(
-          `next-transpile-modules: could not resolve module "${module}". Are you sure the name of the module you are trying to transpile is correct?`
-        );
-
-      return resolved;
-    })
-    .map(path.dirname);
-
-  return resolvedModules;
+  return packagesPaths;
 };
 
 /**
@@ -87,18 +107,18 @@ const withTmInitializer = (modules = [], options = {}) => {
 
     const logger = createLogger(debug);
 
-    const resolvedModules = generateResolvedModules(modules);
+    const modulesPaths = generateModulesPaths(modules);
 
     if (isWebpack5) logger(`WARNING experimental Webpack 5 support enabled`, true);
 
-    logger(`the following paths will get transpiled:\n${resolvedModules.map((mod) => `  - ${mod}`).join('\n')}`);
+    logger(`the following paths will get transpiled:\n${modulesPaths.map((mod) => `  - ${mod}`).join('\n')}`);
 
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
     const match = (path) =>
-      resolvedModules.some((modulePath) => {
+      modulesPaths.some((modulePath) => {
         const transpiled = path.includes(modulePath);
-        logger(`${transpiled} ${path}`);
+        if (transpiled) logger(`transpiled: ${path}`);
         return transpiled;
       });
 
@@ -118,15 +138,15 @@ const withTmInitializer = (modules = [], options = {}) => {
         config.resolve.symlinks = resolveSymlinks;
 
         const hasInclude = (context, request) => {
-          const test = resolvedModules.some((mod) => {
+          const test = modulesPaths.some((mod) => {
             // If we the code requires/import an absolute path
             if (!request.startsWith('.')) {
               try {
-                const resolved = resolve(process.cwd(), request);
+                const moduleDirectory = getPackageRootDirectory(request);
 
-                if (!resolved) return false;
+                if (!moduleDirectory) return false;
 
-                return resolved.includes(mod);
+                return moduleDirectory.includes(mod);
               } catch (err) {
                 return false;
               }
@@ -196,7 +216,7 @@ const withTmInitializer = (modules = [], options = {}) => {
             delete nextCssLoader.issuer.not;
             delete nextCssLoader.issuer.and;
           } else {
-            console.warn('next-transpile-modules: could not find default CSS rule, CSS imports may not work');
+            console.warn('next-transpile-modules - could not find default CSS rule, CSS imports may not work');
           }
 
           if (nextSassLoader) {
@@ -204,7 +224,7 @@ const withTmInitializer = (modules = [], options = {}) => {
             delete nextSassLoader.issuer.not;
             delete nextSassLoader.issuer.and;
           } else {
-            console.warn('next-transpile-modules: could not find default SASS rule, SASS imports may not work');
+            console.warn('next-transpile-modules - could not find default SASS rule, SASS imports may not work');
           }
         }
 

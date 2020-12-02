@@ -26,7 +26,7 @@ What this plugin **does not aim** to solve:
 
 | Next.js version   | Plugin version |
 | ----------------- | -------------- |
-| Next.js 9.5+ / 10 | 4.x, 5.x       |
+| Next.js 9.5+ / 10 | 4.x, 5.x, 6.x  |
 | Next.js 9.2       | 3.x            |
 | Next.js 8 / 9     | 2.x            |
 | Next.js 6 / 7     | 1.x            |
@@ -73,9 +73,11 @@ const withTM = require('next-transpile-modules')(['somemodule', 'and-another'], 
 module.exports = withTM();
 ```
 
-**note:** please declare `withTM` as your last plugin (the "most nested" one).
+**Notes:**
 
-**note 2:** make sure all your packages have [a valid `main` field](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#main).
+- please declare `withTM` as your last plugin (the "most nested" one).
+- make sure all your packages have [a valid `main` field](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#main).
+- there is currently no way to transpile only parts of a package, it's all or nothing
 
 ### Scoped packages
 
