@@ -73,9 +73,11 @@ const withTM = require('next-transpile-modules')(['somemodule', 'and-another'], 
 module.exports = withTM();
 ```
 
-**note:** please declare `withTM` as your last plugin (the "most nested" one).
+**Notes:**
 
-**note 2:** make sure all your packages have [a valid `main` field](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#main).
+- please declare `withTM` as your last plugin (the "most nested" one).
+- make sure all your packages have [a valid `main` field](https://docs.npmjs.com/cli/v6/configuring-npm/package-json#main).
+- there is currently no way to transpile only parts of a package, it's all or nothing
 
 ### Scoped packages
 
