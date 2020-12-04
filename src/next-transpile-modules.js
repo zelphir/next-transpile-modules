@@ -106,7 +106,7 @@ const withTmInitializer = (modules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
     if (modules.length === 0) return nextConfig;
 
-    const resolveSymlinks = options.resolveSymlinks || false;
+    const resolveSymlinks = options.resolveSymlinks || true;
     const isWebpack5 = options.unstable_webpack5 || false;
     const debug = options.debug || false;
 
@@ -136,10 +136,6 @@ const withTmInitializer = (modules = [], options = {}) => {
           );
         }
 
-        // Avoid Webpack to resolve transpiled modules path to their real path as
-        // we want to test modules from node_modules only. If it was enabled,
-        // modules in node_modules installed via symlink would then not be
-        // transpiled.
         config.resolve.symlinks = resolveSymlinks;
 
         const hasInclude = (context, request) => {
