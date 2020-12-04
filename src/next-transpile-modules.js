@@ -17,7 +17,7 @@ const CWD = process.cwd();
  * PnP
  */
 const resolve = enhancedResolve.create.sync({
-  symlinks: false,
+  symlinks: true,
   extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.css', '.scss', '.sass'],
   mainFields: ['main', 'source'],
 });
