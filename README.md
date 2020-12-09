@@ -196,29 +196,15 @@ more:
 - check the [compatibility table](#compatibility-table) of this plugin
 - read more about semver and version resolutions: https://docs.npmjs.com/misc/semver
 
-### I have trouble making it work with v5
+### I have trouble making it work with v5/v6
 
 Please make sure to [read the changelog](https://github.com/martpie/next-transpile-modules/releases).
 
-### I have trouble making it work with Next.js 7
-
-Next.js 7 introduced Webpack 4 and Babel 7, [which changed a couple of things](https://github.com/zeit/next.js/issues/5393#issuecomment-458517433), especially for TypeScript and Flow plugins.
-
-If you have a transpilation error when loading a page, check that your `babel.config.js` is up to date and valid, [you may have forgotten a preset](https://github.com/martpie/next-transpile-modules/issues/1#issuecomment-427749256) there.
-
-### I have trouble with transpilation and Flow/TypeScript
-
-In your Next.js app, make sure you use a `babel.config.js` and not a `.babelrc` as Babel's configuration file (see explanation below).
-
-**Since Next.js 9, you probably don't need that file anymore**, as TypeScript is supported natively.
-
-### I have trouble with transpilation and Yarn workspaces
-
-If you get a transpilation error when using Yarn workspaces, make sure you are using a `babel.config.js` and not a `.babelrc`. The former is [a project-wide Babel configuration](https://babeljs.io/docs/en/config-files), when the latter works for relative paths only (and won't work as Yarn install dependencies in a parent directory).
-
 ### I have trouble with transpilation and my custom `.babelrc`
 
-Make sure you are using a `babel.config.js` and not a `.babelrc`. The former is [a project-wide Babel configuration](https://babeljs.io/docs/en/config-files), when the latter works for relative paths only.
+If you get a transpilation error when using a custom Babel configuration, make sure you are using a `babel.config.js` and not a `.babelrc`.
+
+The former is [a project-wide Babel configuration](https://babeljs.io/docs/en/config-files), when the latter works for relative paths only (and may not work for Yarn for example, as it installs dependencies in a parent directory).
 
 ### I have trouble with Yarn and hot reloading
 
@@ -228,7 +214,7 @@ You can go back to `npm`, or use Yarn workspaces. See [an example](https://githu
 
 ### I have trouble making it work with Lerna
 
-Lerna's purpose is to publish different packages from a monorepo, **it does not help for and does not intend to help local development with local modules** (<- this, in caps).
+Lerna's purpose is to publish different packages from a monorepo, **it does not help for and does not intend to help local development with local modules** (<- this, **IN CAPS**).
 
 This is not coming from me, but [from Lerna's maintainer](https://github.com/lerna/lerna/issues/1243#issuecomment-401396850).
 
