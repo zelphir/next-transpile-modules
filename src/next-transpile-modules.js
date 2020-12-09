@@ -13,8 +13,7 @@ const escalade = require('escalade/sync');
 const CWD = process.cwd();
 
 /**
- * Our own Node.js resolver that can ignore symlinks resolution and  can support
- * PnP
+ * Our own Node.js resolver
  */
 const resolve = enhancedResolve.create.sync({
   symlinks: true,
