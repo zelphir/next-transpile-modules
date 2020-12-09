@@ -196,7 +196,7 @@ more:
 - check the [compatibility table](#compatibility-table) of this plugin
 - read more about semver and version resolutions: https://docs.npmjs.com/misc/semver
 
-### I have trouble making it work with v5/v6
+### I have trouble making it work after upgrading to v5/v6
 
 Please make sure to [read the changelog](https://github.com/martpie/next-transpile-modules/releases).
 
