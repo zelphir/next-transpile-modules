@@ -51,7 +51,6 @@ const getPackageRootDirectory = (module) => {
   try {
     // Get the module path
     packageDirectory = resolve(CWD, module);
-    console.log('packageDirectory 2', packageDirectory);
 
     if (!packageDirectory) {
       throw new Error(
