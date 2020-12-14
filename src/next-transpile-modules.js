@@ -2,7 +2,7 @@ const path = require('path');
 const process = require('process');
 
 const enhancedResolve = require('enhanced-resolve');
-const pkgDir = require('pkg-dir');
+const escalade = require('escalade/sync');
 
 // Use me when needed
 // const util = require('util');
@@ -58,14 +58,19 @@ const getPackageRootDirectory = (module) => {
       );
     }
 
-    try {
-      // Get the location of its package.json
-      packageRootDirectory = pkgDir.sync(packageDirectory);
-    } catch (err) {
+    // Get the location of its package.json
+    const pkgPath = escalade(packageDirectory, (dir, names) => {
+      if (names.includes('package.json')) {
+        return 'package.json';
+      }
+      return false;
+    });
+    if (pkgPath == null) {
       throw new Error(
         `next-transpile-modules - an error happened when trying to get the root directory of "${module}". Is it missing a package.json?\n${err}`
       );
     }
+    packageRootDirectory = path.dirname(pkgPath);
   } catch (err) {
     throw new Error(`next-transpile-modules - an unexpected error happened when trying to resolve "${module}"\n${err}`);
   }
