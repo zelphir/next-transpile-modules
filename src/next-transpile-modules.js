@@ -128,7 +128,7 @@ const withTmInitializer = (modules = [], options = {}) => {
         if (transpiled) logger(`transpiled: ${path}`);
         return transpiled;
       });
-    }
+    };
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
