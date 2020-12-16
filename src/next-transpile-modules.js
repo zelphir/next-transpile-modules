@@ -100,7 +100,7 @@ const createLogger = (enable) => {
 /**
  * Transpile modules with Next.js Babel configuration
  * @param {string[]} modules
- * @param {{resolveSymlinks?: boolean; debug?: boolean, unstable_webpack5?: boolean}} options
+ * @param {{resolveSymlinks?: boolean, debug?: boolean, unstable_webpack5?: boolean}} options
  */
 const withTmInitializer = (modules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
@@ -120,12 +120,15 @@ const withTmInitializer = (modules = [], options = {}) => {
 
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
-    const match = (path) =>
-      modulesPaths.some((modulePath) => {
-        const transpiled = path.includes(modulePath);
+    const match = (path) => {
+      const lastEntry = path.split('/node_modules/').slice(-1)[0];
+
+      return modules.some((modulePath) => {
+        const transpiled = lastEntry.includes(modulePath);
         if (transpiled) logger(`transpiled: ${path}`);
         return transpiled;
       });
+    }
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
