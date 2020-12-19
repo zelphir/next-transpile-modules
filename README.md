@@ -2,6 +2,8 @@
 
 ![Build Status](https://github.com/martpie/next-transpile-modules/workflows/tests/badge.svg)
 ![Dependencies](https://img.shields.io/david/martpie/next-transpile-modules)
+[![sponsor: Creative Tim](https://img.shields.io/badge/sponsor-Creative%20Tim-blue)](https://creative-tim.com/?affiliate_id=140482)
+
 
 Transpile modules from `node_modules` using the Next.js Babel configuration.
 
