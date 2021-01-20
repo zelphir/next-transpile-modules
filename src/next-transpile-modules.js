@@ -19,7 +19,7 @@ const CWD = process.cwd();
 const resolve = enhancedResolve.create.sync({
   symlinks: false,
   extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.css', '.scss', '.sass'],
-  mainFields: ['main', 'source'],
+  mainFields: ['main', 'module', 'source'],
 });
 
 /**
