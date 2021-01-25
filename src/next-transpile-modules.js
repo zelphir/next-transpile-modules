@@ -121,7 +121,7 @@ const withTmInitializer = (modules = [], options = {}) => {
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
     const match = (path) => {
-      const lastEntry = path.split('/node_modules/').slice(-1)[0];
+      const lastEntry = path.split(`${path.sep}node_modules${path.sep}`).slice(-1)[0];
 
       return modules.some((modulePath) => {
         const transpiled = lastEntry.includes(modulePath);
