@@ -4,7 +4,6 @@
 ![Dependencies](https://img.shields.io/david/martpie/next-transpile-modules)
 [![sponsor: Creative Tim](https://img.shields.io/badge/sponsor-Creative%20Tim-blue)](https://creative-tim.com/?affiliate_id=140482)
 
-
 Transpile modules from `node_modules` using the Next.js Babel configuration.
 
 Makes it easy to have local libraries and keep a slick, manageable dev experience.
@@ -33,7 +32,7 @@ What this plugin **does not aim** to solve:
 | Next.js 8 / 9     | 2.x            |
 | Next.js 6 / 7     | 1.x            |
 
-Latest version tested: **10.0.0**.
+Latest Next.js version tested: **10.0.5**.
 
 ## Installation
 
