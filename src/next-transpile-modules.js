@@ -98,6 +98,23 @@ const createLogger = (enable) => {
 };
 
 /**
+ * Matcher function for webpack to decide which modules to transpile
+ * @param {string[]} modulesToTranspile
+ * @param {function} logger
+ */
+const webpackMatcher = (modulesToTranspile, logger = createLogger(false)) => {
+  return (pathValue) => {
+    const lastEntry = pathValue.split(`${pathValue.sep}node_modules${pathValue.sep}`).slice(-1)[0];
+
+    return modulesToTranspile.some((modulePath) => {
+      const transpiled = lastEntry.includes(path.normalize(modulePath));
+      if (transpiled) logger(`transpiled: ${pathValue}`);
+      return transpiled;
+    });
+  };
+};
+
+/**
  * Transpile modules with Next.js Babel configuration
  * @param {string[]} modules
  * @param {{resolveSymlinks?: boolean, debug?: boolean, unstable_webpack5?: boolean}} options
@@ -120,15 +137,7 @@ const withTmInitializer = (modules = [], options = {}) => {
 
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
-    const match = (path) => {
-      const lastEntry = path.split(`${path.sep}node_modules${path.sep}`).slice(-1)[0];
-
-      return modules.some((modulePath) => {
-        const transpiled = lastEntry.includes(modulePath);
-        if (transpiled) logger(`transpiled: ${path}`);
-        return transpiled;
-      });
-    };
+    const match = webpackMatcher(modules, logger);
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
