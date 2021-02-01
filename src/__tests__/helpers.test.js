@@ -29,7 +29,6 @@ describe('webpackMatcher', () => {
     expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/false'))).toBe(false);
   });
 
-  // These tests don't work as path.normalize normalizes `\\` to `\` and not `/` on Unix systems
   test('should return correct value on Unix systems', () => {
     const testStrings = ['test', '@mono\\module', '@mono\\sub\\module'];
     const matcherInstance = webpackMatcher(testStrings);

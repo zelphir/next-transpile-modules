@@ -104,12 +104,11 @@ const createLogger = (enable) => {
  */
 const webpackMatcher = (modulesToTranspile, logger = createLogger(false)) => {
   return (pathValue) => {
-    const normalizedPathValue = path.normalize(pathValue);
-    const lastEntry = pathValue.split(`${normalizedPathValue.sep}node_modules${normalizedPathValue.sep}`).slice(-1)[0];
+    const lastEntry = pathValue.split(`${pathValue.sep}node_modules${pathValue.sep}`).slice(-1)[0];
 
     return modulesToTranspile.some((modulePath) => {
       const transpiled = lastEntry.includes(path.normalize(modulePath));
-      if (transpiled) logger(`transpiled: ${normalizedPathValue}`);
+      if (transpiled) logger(`transpiled: ${pathValue}`);
       return transpiled;
     });
   };
