@@ -102,7 +102,7 @@ const createLogger = (enable) => {
  * @param {string[]} modulesToTranspile
  * @param {function} logger
  */
-const webpackMatcher = (modulesToTranspile, logger = createLogger(false)) => {
+const createWebpackMatcher = (modulesToTranspile, logger = createLogger(false)) => {
   return (pathValue) => {
     const lastEntry = pathValue.split(`${pathValue.sep}node_modules${pathValue.sep}`).slice(-1)[0];
 
@@ -137,7 +137,7 @@ const withTmInitializer = (modules = [], options = {}) => {
 
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
-    const match = webpackMatcher(modules, logger);
+    const matcher = createWebpackMatcher(modules, logger);
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
@@ -198,7 +198,7 @@ const withTmInitializer = (modules = [], options = {}) => {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             use: options.defaultLoaders.babel,
-            include: match,
+            include: matcher,
           });
 
           // IMPROVE ME: we are losing all the cache on node_modules, which is terrible
@@ -210,7 +210,7 @@ const withTmInitializer = (modules = [], options = {}) => {
           config.module.rules.push({
             test: /\.+(js|jsx|mjs|ts|tsx)$/,
             loader: options.defaultLoaders.babel,
-            include: match,
+            include: matcher,
           });
         }
 
@@ -229,7 +229,7 @@ const withTmInitializer = (modules = [], options = {}) => {
           );
 
           if (nextCssLoader) {
-            nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(match) : match;
+            nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(matcher) : matcher;
             delete nextCssLoader.issuer.not;
             delete nextCssLoader.issuer.and;
           } else {
@@ -237,7 +237,7 @@ const withTmInitializer = (modules = [], options = {}) => {
           }
 
           if (nextSassLoader) {
-            nextSassLoader.issuer.or = nextSassLoader.issuer.and ? nextSassLoader.issuer.and.concat(match) : match;
+            nextSassLoader.issuer.or = nextSassLoader.issuer.and ? nextSassLoader.issuer.and.concat(matcher) : matcher;
             delete nextSassLoader.issuer.not;
             delete nextSassLoader.issuer.and;
           } else {
