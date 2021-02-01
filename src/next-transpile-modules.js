@@ -227,6 +227,28 @@ const withTmInitializer = (modules = [], options = {}) => {
             (rule) => rule.sideEffects === false && regexEqual(rule.test, /\.module\.(scss|sass)$/)
           );
 
+          const nextGlobalCssErrorLoader = nextCssLoaders.oneOf.find(
+            (rule) =>
+              rule &&
+              rule.use &&
+              rule.use.options &&
+              rule.use.options.reason.startsWith(
+                'Global CSS \x1B[1mcannot\x1B[22m be imported from within \x1B[1mnode_modules\x1B[22m.'
+              )
+          );
+
+          const nextGlobalCssAppErrorLoader = nextCssLoaders.oneOf.find(
+            (rule) =>
+              rule &&
+              rule.use &&
+              rule.use.options &&
+              rule.use.options.reason.startsWith(
+                'Global CSS \x1B[1mcannot\x1B[22m be imported from files other than your \x1B[1mCustom <App>\x1B[22m. Please move all global CSS imports to \x1B[36mpages/_app.jsx\x1B[39m. Or convert the import to Component-Level CSS (CSS Modules).'
+              )
+          );
+
+          const nextGlobalCssLoader = nextCssLoaders.oneOf.find((rule) => regexEqual(rule.test, /(?<!\.module)\.css$/));
+
           if (nextCssLoader) {
             nextCssLoader.issuer.or = nextCssLoader.issuer.and ? nextCssLoader.issuer.and.concat(match) : match;
             delete nextCssLoader.issuer.not;
@@ -241,6 +263,22 @@ const withTmInitializer = (modules = [], options = {}) => {
             delete nextSassLoader.issuer.and;
           } else {
             console.warn('next-transpile-modules - could not find default SASS rule, SASS imports may not work');
+          }
+
+          // Disable "css cannot be imported from node_modules"
+          if (nextGlobalCssErrorLoader) {
+            nextGlobalCssErrorLoader.issuer.and = nextGlobalCssErrorLoader.issuer.and.concat(() => false);
+          }
+
+          // Disable "css can only be imported from App"
+          if (nextGlobalCssAppErrorLoader) {
+            nextGlobalCssAppErrorLoader.issuer = {};
+            nextGlobalCssAppErrorLoader.issuer.and = [() => false];
+          }
+
+          // Enable global CSS loader for node_modules
+          if (nextGlobalCssLoader) {
+            delete nextGlobalCssLoader.issuer.not;
           }
         }
 
