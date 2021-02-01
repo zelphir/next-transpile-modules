@@ -1,5 +1,5 @@
 const rewire = require('rewire');
-const path = rquire('path');
+const path = require('path');
 
 const withTmRewire = rewire('../next-transpile-modules');
 
