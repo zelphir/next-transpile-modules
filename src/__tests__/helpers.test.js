@@ -1,4 +1,5 @@
 const rewire = require('rewire');
+const path = rquire('path');
 
 const withTmRewire = rewire('../next-transpile-modules');
 
@@ -19,17 +20,17 @@ describe('regexEqual', () => {
 
 describe('webpackMatcher', () => {
   test('should return correct value on Unix systems', () => {
-    const testStrings = ['test', '@mono/module', '@mono/sub/module'];
+    const testStrings = ['test', '@mono/module', '@mono/sub/module', '@mono\\module', '@mono\\sub\\module'];
     const matcherInstance = webpackMatcher(testStrings);
-    expect(matcherInstance('/Users/User1/module/node_modules/test/test.ext')).toBe(true);
-    expect(matcherInstance('/Users/User1/module/node_modules/@mono/module/foo')).toBe(true);
-    expect(matcherInstance('/Users/User1/module/node_modules/@mono/sub/module/foo')).toBe(true);
-    expect(matcherInstance('/Users/User1/module/node_modules/@mono/false/module')).toBe(false);
-    expect(matcherInstance('/Users/User1/module/node_modules/@mono/false')).toBe(false);
+    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/test/test.ext'))).toBe(true);
+    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/module/foo'))).toBe(true);
+    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/sub/module/foo'))).toBe(true);
+    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/false/module'))).toBe(false);
+    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/false'))).toBe(false);
   });
 
   test('should return correct value on Windows systems', () => {
-    const testStrings = ['test', '@mono/module', '@mono/sub/module'];
+    const testStrings = ['test', '@mono\\module', '@mono\\sub\\module'];
     const matcherInstance = webpackMatcher(testStrings);
     expect(matcherInstance('C:\\module\\node_modules\\test\\test.ext')).toBe(true);
     expect(matcherInstance('C:\\module\\node_modules\\@mono\\module\\foo')).toBe(true);
