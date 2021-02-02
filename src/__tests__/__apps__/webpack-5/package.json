@@ -7,6 +7,6 @@
     "app"
   ],
   "resolutions": {
-    "webpack": "^5.6.0"
+    "webpack": "^5.15.0"
   }
 }
