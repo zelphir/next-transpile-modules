@@ -2,4 +2,8 @@ const withTM = require('./next-transpile-modules')(['shared', 'shared-ts', 'shar
   unstable_webpack5: true,
 });
 
-module.exports = withTM({});
+module.exports = withTM({
+  future: {
+    webpack5: true,
+  },
+});
