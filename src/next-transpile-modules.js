@@ -1,3 +1,11 @@
+/**
+ * disclaimer:
+ *
+ * THIS PLUGIN IS A F*CKING BIG HACK.
+ *
+ * don't even try to reason about the quality of the following lines of code.
+ */
+
 const path = require('path');
 const process = require('process');
 
@@ -107,7 +115,7 @@ const withTmInitializer = (modules = [], options = {}) => {
     if (modules.length === 0) return nextConfig;
 
     const resolveSymlinks = options.resolveSymlinks || false;
-    const isWebpack5 = options.unstable_webpack5 || false;
+    const isWebpack5 = (nextConfig.future && nextConfig.future.webpack5) || false;
     const debug = options.debug || false;
 
     const logger = createLogger(debug);
