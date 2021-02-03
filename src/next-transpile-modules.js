@@ -120,12 +120,16 @@ const withTmInitializer = (modules = [], options = {}) => {
 
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
-    const match = (path) => {
-      const lastEntry = path.split(`${path.sep}node_modules${path.sep}`).slice(-1)[0];
+    const match = (pathToMatch) => {
+      const isNestedNodeModules = (pathToMatch.match(/node_modules/g) || []).length > 1;
 
-      return modules.some((modulePath) => {
-        const transpiled = lastEntry.includes(modulePath);
-        if (transpiled) logger(`transpiled: ${path}`);
+      if (isNestedNodeModules) {
+        return false;
+      }
+
+      return modulesPaths.some((modulePath) => {
+        const transpiled = pathToMatch.includes(modulePath);
+        if (transpiled) logger(`transpiled: ${pathToMatch}`);
         return transpiled;
       });
     };
