@@ -1,5 +1,4 @@
 const rewire = require('rewire');
-const path = require('path');
 
 // TODO: remove me and mock path.sep instead
 const process = require('process');
@@ -23,46 +22,56 @@ describe('regexEqual', () => {
 });
 
 describe('createWebpackMatcher', () => {
-  testif(process.platform !== 'win32')('should return correct value on Unix systems', () => {
-    const testStrings = ['test', '@mono/module', '@mono/sub/module'];
-    const matcherInstance = createWebpackMatcher(testStrings);
+  const UNIX_MODULES_PATH = ['/Users/Test/app/node_modules/test', '/Users/Test/app/node_modules/@scoped/scoped-module'];
+  const WINDOWS_MODULES_PATH = ['C:\\app\\node_modules\\test', 'C:\\app\\node_modules\\@scoped\\scoped-module'];
 
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/test/test.ext'))).toBe(true);
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/module/foo'))).toBe(true);
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/sub/module/foo'))).toBe(true);
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/false/module'))).toBe(false);
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/false'))).toBe(false);
+  describe('should return true for modules that should be transpiled', () => {
+    testif(process.platform !== 'win32')('linux/darwin', () => {
+      const matcher = createWebpackMatcher(UNIX_MODULES_PATH);
+
+      expect(matcher('/Users/Test/app/node_modules/test/some-file.js')).toBe(true);
+      expect(matcher('/Users/Test/app/node_modules/@scoped/scoped-module/some-file.js')).toBe(true);
+    });
+
+    testif(process.platform === 'win32')('win32', () => {
+      const matcher = createWebpackMatcher(UNIX_MODULES_PATH);
+
+      expect(matcher('C:\\app\\node_modules\\test\\some-file.js')).toBe(true);
+      expect(matcher('C:\\app\\node_modules\\@scoped\\scoped-module\\some-file.js')).toBe(true);
+    });
   });
 
-  testif(process.platform === 'win32')('should return correct value on Unix systems', () => {
-    const testStrings = ['test', '@mono\\module', '@mono\\sub\\module'];
-    const matcherInstance = createWebpackMatcher(testStrings);
+  describe('should return false for other modules', () => {
+    testif(process.platform !== 'win32')('linux/darwin', () => {
+      const matcher = createWebpackMatcher(UNIX_MODULES_PATH);
 
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/test/test.ext'))).toBe(true);
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/module/foo'))).toBe(true);
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/sub/module/foo'))).toBe(true);
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/false/module'))).toBe(false);
-    expect(matcherInstance(path.normalize('/Users/User1/module/node_modules/@mono/false'))).toBe(false);
+      expect(matcher('/Users/Test/app/node_modules/nope/some-file.js')).toBe(false);
+      expect(matcher('/Users/Test/app/node_modules/@nope-scope/scoped-module/some-file.js')).toBe(false);
+    });
+
+    testif(process.platform === 'win32')('win32', () => {
+      const matcher = createWebpackMatcher(UNIX_MODULES_PATH);
+
+      expect(matcher('C:\\app\\node_modules\\nope\\some-file.js')).toBe(false);
+      expect(matcher('C:\\app\\node_modules\\@nope-scoped\\scoped-module\\some-file.js')).toBe(false);
+    });
   });
 
-  testif(process.platform !== 'win32')('should return correct value on Windows systems', () => {
-    const testStrings = ['test', '@mono\\module', '@mono\\sub\\module'];
-    const matcherInstance = createWebpackMatcher(testStrings);
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\test\\test.ext'))).toBe(true);
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\@mono\\module\\foo'))).toBe(true);
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\@mono\\sub\\module\\foo'))).toBe(true);
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\@mono\\false\\module'))).toBe(false);
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\@mono\\false'))).toBe(false);
-  });
+  describe('should return false for nested node_modules', () => {
+    testif(process.platform !== 'win32')('linux/darwin', () => {
+      const matcher = createWebpackMatcher(UNIX_MODULES_PATH);
 
-  testif(process.platform === 'win32')('should return correct value on Windows systems', () => {
-    const testStrings = ['test', '@mono/module', '@mono/sub/module'];
-    const matcherInstance = createWebpackMatcher(testStrings);
+      expect(matcher('/Users/Test/app/node_modules/test/node_modules/nested/some-file.js')).toBe(false);
+      expect(matcher('/Users/Test/app/node_modules/@scoped/scoped-module/node_modules/nested/some-file.js')).toBe(
+        false
+      );
+    });
 
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\test\\test.ext'))).toBe(true);
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\@mono\\module\\foo'))).toBe(true);
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\@mono\\sub\\module\\foo'))).toBe(true);
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\@mono\\false\\module'))).toBe(false);
-    expect(matcherInstance(path.normalize('C:\\module\\node_modules\\@mono\\false'))).toBe(false);
+    testif(process.platform === 'win32')('win32', () => {
+      const matcher = createWebpackMatcher(WINDOWS_MODULES_PATH);
+
+      expect(matcher('C:\\app\\node_modules\\test\\node_modules\\nested\\some-file.js')).toBe(false);
+      expect(matcher('C:\\app\\node_modules\\@scoped\\scoped-module\\node_modules\\nested\\some-file.js')).toBe(false);
+    });
   });
 });
