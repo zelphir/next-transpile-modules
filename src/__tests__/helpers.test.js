@@ -34,7 +34,7 @@ describe('createWebpackMatcher', () => {
     });
 
     testif(process.platform === 'win32')('win32', () => {
-      const matcher = createWebpackMatcher(UNIX_MODULES_PATH);
+      const matcher = createWebpackMatcher(WINDOWS_MODULES_PATH);
 
       expect(matcher('C:\\app\\node_modules\\test\\some-file.js')).toBe(true);
       expect(matcher('C:\\app\\node_modules\\@scoped\\scoped-module\\some-file.js')).toBe(true);
@@ -50,7 +50,7 @@ describe('createWebpackMatcher', () => {
     });
 
     testif(process.platform === 'win32')('win32', () => {
-      const matcher = createWebpackMatcher(UNIX_MODULES_PATH);
+      const matcher = createWebpackMatcher(WINDOWS_MODULES_PATH);
 
       expect(matcher('C:\\app\\node_modules\\nope\\some-file.js')).toBe(false);
       expect(matcher('C:\\app\\node_modules\\@nope-scoped\\scoped-module\\some-file.js')).toBe(false);
