@@ -141,7 +141,7 @@ const withTmInitializer = (modules = [], options = {}) => {
 
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
-    const matcher = createWebpackMatcher(modules, logger);
+    const matcher = createWebpackMatcher(modulesPaths, logger);
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
