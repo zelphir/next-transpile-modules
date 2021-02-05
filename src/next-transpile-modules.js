@@ -129,7 +129,7 @@ const createWebpackMatcher = (modulesToTranspile, logger = createLogger(false)) 
 /**
  * Transpile modules with Next.js Babel configuration
  * @param {string[]} modules
- * @param {{resolveSymlinks?: boolean, debug?: boolean, unstable_webpack5?: boolean}} options
+ * @param {{resolveSymlinks?: boolean, debug?: boolean}} options
  */
 const withTmInitializer = (modules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
