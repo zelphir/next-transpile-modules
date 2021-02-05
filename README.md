@@ -54,6 +54,7 @@ yarn add next-transpile-modules
 - `options` Object (optional)
   - `resolveSymlinks` Boolean: Enable symlinks resolution to their real path by Webpack (most of the time, you won't want that) (default to `false`)
   - `debug` Boolean: Display some informative logs in the console (can get noisy!) (default to `false`)
+  - `__unstable_matcher` (path) => boolean: Custom matcher that will override the default one. Don't use it.
 
 #### Note on Webpack 5 support
 

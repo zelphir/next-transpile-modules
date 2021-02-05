@@ -36,6 +36,7 @@ const resolve = enhancedResolve.create.sync({
  *
  * @param {RegExp} x
  * @param {RegExp} y
+ * @returns {boolean}
  */
 const regexEqual = (x, y) => {
   return (
@@ -51,6 +52,7 @@ const regexEqual = (x, y) => {
 /**
  * Return the root path (package.json directory) of a given module
  * @param {string} module
+ * @returns {string}
  */
 const getPackageRootDirectory = (module) => {
   let packageDirectory;
@@ -89,6 +91,7 @@ const getPackageRootDirectory = (module) => {
 /**
  * Resolve modules to their real paths
  * @param {string[]} modules
+ * @returns {string[]}
  */
 const generateModulesPaths = (modules) => {
   const packagesPaths = modules.map(getPackageRootDirectory);
@@ -98,6 +101,8 @@ const generateModulesPaths = (modules) => {
 
 /**
  * Logger for the debug mode
+ * @param {boolean} enable enable the logger or not
+ * @returns {(message: string, force: boolean) => void}
  */
 const createLogger = (enable) => {
   return (message, force) => {
@@ -109,18 +114,19 @@ const createLogger = (enable) => {
  * Matcher function for webpack to decide which modules to transpile
  * @param {string[]} modulesToTranspile
  * @param {function} logger
+ * @returns {(path: string) => boolean}
  */
 const createWebpackMatcher = (modulesToTranspile, logger = createLogger(false)) => {
-  return (pathValue) => {
-    const isNestedNodeModules = (pathValue.match(/node_modules/g) || []).length > 1;
+  return (filePath) => {
+    const isNestedNodeModules = (filePath.match(/node_modules/g) || []).length > 1;
 
     if (isNestedNodeModules) {
       return false;
     }
 
     return modulesToTranspile.some((modulePath) => {
-      const transpiled = pathValue.includes(modulePath);
-      if (transpiled) logger(`transpiled: ${pathValue}`);
+      const transpiled = filePath.includes(modulePath);
+      if (transpiled) logger(`transpiled: ${filePath}`);
       return transpiled;
     });
   };
@@ -129,7 +135,7 @@ const createWebpackMatcher = (modulesToTranspile, logger = createLogger(false)) 
 /**
  * Transpile modules with Next.js Babel configuration
  * @param {string[]} modules
- * @param {{resolveSymlinks?: boolean, debug?: boolean}} options
+ * @param {{resolveSymlinks?: boolean, debug?: boolean, __unstable_matcher: (path: string) => boolean}} options
  */
 const withTmInitializer = (modules = [], options = {}) => {
   const withTM = (nextConfig = {}) => {
@@ -149,7 +155,7 @@ const withTmInitializer = (modules = [], options = {}) => {
 
     // Generate Webpack condition for the passed modules
     // https://webpack.js.org/configuration/module/#ruleinclude
-    const matcher = createWebpackMatcher(modulesPaths, logger);
+    const matcher = options.__unstable_matcher || createWebpackMatcher(modulesPaths, logger);
 
     return Object.assign({}, nextConfig, {
       webpack(config, options) {
