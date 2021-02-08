@@ -28,6 +28,8 @@ const resolve = enhancedResolve.create.sync({
   symlinks: false,
   extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.css', '.scss', '.sass'],
   mainFields: ['main', 'module', 'source'],
+  // Is it right? https://github.com/webpack/enhanced-resolve/issues/283#issuecomment-775162497
+  conditionNames: ['require'],
 });
 
 /**
