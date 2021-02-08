@@ -127,7 +127,7 @@ const createWebpackMatcher = (modulesToTranspile, logger = createLogger(false)) 
     }
 
     return modulesToTranspile.some((modulePath) => {
-      const transpiled = filePath.includes(modulePath);
+      const transpiled = filePath.startsWith(modulePath);
       if (transpiled) logger(`transpiled: ${filePath}`);
       return transpiled;
     });
