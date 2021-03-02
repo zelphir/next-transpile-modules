@@ -71,7 +71,11 @@ module.exports = withTM();
 
 ```js
 // next.config.js
-const withTM = require('next-transpile-modules')(['somemodule', 'and-another'], { unstable_webpack5: true });
+const withTM = require('next-transpile-modules')(['somemodule', 'and-another'], {
+  future: {
+    webpack5: true
+  }
+})
 
 module.exports = withTM();
 ```
