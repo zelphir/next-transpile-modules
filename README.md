@@ -71,13 +71,13 @@ module.exports = withTM();
 
 ```js
 // next.config.js
-const withTM = require('next-transpile-modules')(['somemodule', 'and-another'], {
+const withTM = require('next-transpile-modules')(['somemodule', 'and-another']);
+
+module.exports = withTM({
   future: {
     webpack5: true
   }
-})
-
-module.exports = withTM();
+});
 ```
 
 **Notes:**
