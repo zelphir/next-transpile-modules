@@ -32,7 +32,7 @@ What this plugin **does not aim** to solve:
 | Next.js 8 / 9     | 2.x            |
 | Next.js 6 / 7     | 1.x            |
 
-Latest Next.js version tested: **10.0.7**.
+Latest Next.js version tested: **10.0.8**.
 
 ## Installation
 
