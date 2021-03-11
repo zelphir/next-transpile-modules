@@ -273,7 +273,11 @@ You can tell Webpack how to resolve the `react` of your Styleguide to use the ve
 const withTM = require('next-transpile-modules')(['styleguide']);
 
 module.exports = withTM({
-  webpack: (config) => {
+  webpack: (config, options) => {
++   if (options.isServer) {
++     config.externals = ['react', ...config.externals];
++   }
++
 +   config.resolve.alias['react'] = path.resolve(__dirname, '.', 'node_modules', 'react');
 
     return config
