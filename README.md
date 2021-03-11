@@ -219,6 +219,15 @@ If you add a local library (let's say with `yarn add ../some-shared-module`), Ya
 
 You can go back to `npm`, or use Yarn workspaces. See [an example](https://github.com/zeit/next.js/tree/canary/examples/with-yarn-workspaces) in the official Next.js repo.
 
+### How do I find out which package is causing a runtime exception?
+
+- add `config.optimization.minimize = false;` to you `next.config.js`'s Webpack configuration
+- run a production build
+- run it on the browser throwing the error
+- open the console, jump to the line where it failed
+- goes a little bit up in the lines of code, and check the Webpack comments telling you which module is affected
+
+
 ### I have trouble making it work with Lerna
 
 Lerna's purpose is to publish different packages from a monorepo, **it does not help for and does not intend to help local development with local modules** (<- this, **IN CAPS**).
