@@ -32,7 +32,7 @@ What this plugin **does not aim** to solve:
 | Next.js 8 / 9     | 2.x            |
 | Next.js 6 / 7     | 1.x            |
 
-Latest Next.js version tested: **10.0.6**.
+Latest Next.js version tested: **10.0.7**.
 
 ## Installation
 
@@ -75,8 +75,8 @@ const withTM = require('next-transpile-modules')(['somemodule', 'and-another']);
 
 module.exports = withTM({
   future: {
-    webpack5: true
-  }
+    webpack5: true,
+  },
 });
 ```
 
