@@ -241,6 +241,17 @@ const withTmInitializer = (modules = [], options = {}) => {
             (rule) => rule.sideEffects === false && regexEqual(rule.test, /\.module\.(scss|sass)$/)
           );
 
+          const nextCssErrorLoader = nextCssLoaders.oneOf.find(
+            (rule) =>
+              rule &&
+              rule.use &&
+              rule.use.options &&
+              rule.use.options.reason &&
+              rule.use.options.reason.startsWith(
+                'CSS Modules \x1B[1mcannot\x1B[22m be imported from within \x1B[1mnode_modules\x1B[22m.'
+              )
+          );
+
           const nextGlobalCssErrorLoader = nextCssLoaders.oneOf.find(
             (rule) =>
               rule &&
@@ -287,6 +298,11 @@ const withTmInitializer = (modules = [], options = {}) => {
             nextGlobalCssErrorLoader.issuer.and = nextGlobalCssErrorLoader.issuer.and.concat(() => false);
           }
 
+          if (nextCssErrorLoader) {
+            nextCssErrorLoader.sideEffects = false;
+            nextCssErrorLoader.use = nextCssLoader.use;
+          }
+
           // Disable "css can only be imported from App"
           // TODO: issuer optimization
           if (nextGlobalCssAppErrorLoader) {
@@ -322,3 +338,4 @@ const withTmInitializer = (modules = [], options = {}) => {
 };
 
 module.exports = withTmInitializer;
+
